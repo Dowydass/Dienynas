@@ -7,6 +7,12 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" Margin="167,119,10,10" SelectionChanged="DataGrid_SelectionChanged"/>
+        <Label Content="Studentu skaičuis&#xD;&#xA;&#xD;&#xA;          0" HorizontalAlignment="Left" Height="92" Margin="168,10,0,0" VerticalAlignment="Top" Width="146"/>
+        <Label Content="Moduliu skaičius&#xD;&#xA;&#xD;&#xA;             0" HorizontalAlignment="Center" Height="92" Margin="0,10,0,0" VerticalAlignment="Top" Width="132"/>
+        <Label Content="Label" HorizontalAlignment="Left" Height="160" Margin="10,249,0,0" VerticalAlignment="Top" Width="133"/>
+        <Label Content="Studentu paieška" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="133"/>
+        <Label Content="Prideti nauja studenta" HorizontalAlignment="Left" Height="32" Margin="10,56,0,0" VerticalAlignment="Top" Width="133"/>
+
     </Grid>
 </Window>
