@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,6 +19,10 @@ namespace Dienynas
             this.Id = id;
             this.Name = name;
             this.Lastname = lastname;
+        }
+        public Student()
+        {
+            // Tuscias konstruktorius dėl duomenų užpildymo
         }
     }
 }

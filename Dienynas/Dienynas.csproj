@@ -108,7 +108,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DatabaseManager.cs" />
-    <Compile Include="Grade.cs" />
+    <Compile Include="Grade.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="InOutUtils.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Student.cs" />
