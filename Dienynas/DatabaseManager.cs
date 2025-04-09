@@ -1,4 +1,4 @@
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +7,9 @@ using System.Runtime.Remoting.Messaging;
 
 namespace Dienynas
 {
+    /// Database Table structure:
+
+    /// (Modules - id) + (Student - id) = (Grades - id, Modules - id, Student - id)
     public class DatabaseManager
     {
         private string connectionString = "server=localhost;user=root;password=Admin123;database=database;";
@@ -26,7 +29,7 @@ namespace Dienynas
 
                     while (reader.Read())
                     {
-                        Console.WriteLine(reader["firstname"]);
+                       
                     }
 
                     reader.Close();
@@ -34,9 +37,18 @@ namespace Dienynas
                 catch (Exception ex)
                 {
                     Console.WriteLine("Klaida: " + ex.Message);
+                    MainWindow.ShowMessage("Duomenų bazė: " + ex.Message, "Klaida");
+                    MainWindow.CloseWindow();
                 }
             }
         }
+
+        /* <summary>
+         Gauti studentų sąrašą iš duomenų bazės.
+         MainWindow klasėje naudojamas kaip studentų sąrašas.
+         Grąžina sąrašą Student objektų.
+         </summary>
+        */
         public List<Student> GetStudents()
         {
             List<Student> students = new List<Student>();
@@ -52,8 +64,8 @@ namespace Dienynas
                         students.Add(new Student
                         {
                             Id = reader.GetInt32("id"),
-                            Name = reader.GetString("firstname"),
-                            Lastname = reader.GetString("lastname")
+                            Name = reader.GetString("Vardas"),
+                            Lastname = reader.GetString("Pavarde")
                         });
                     }
                 }
@@ -61,6 +73,9 @@ namespace Dienynas
             return students;
         }
 
+
+       
+        /// UNDONE: Prideda studentą į duomenų bazę.
         public void AddStudent(string vardas, string pavarde)
         {
             using (var connection = new MySqlConnection(connectionString))
@@ -72,11 +87,13 @@ namespace Dienynas
                     command.Parameters.AddWithValue("@vardas", vardas);
                     command.Parameters.AddWithValue("@pavarde", pavarde);
                     command.ExecuteNonQuery();
+                    Console.WriteLine("Studentas pridėtas: " + vardas + " " + pavarde);
                 }
             }
         }
 
 
+        /// TODO: Ištrinti studentą iš duomenų bazės pagal ID.
         public void DeleteStudent(int id)
         {
             using (var connection = new MySqlConnection(connectionString))
@@ -106,5 +123,54 @@ namespace Dienynas
                 }
             }
         }
+    
+
+        public List<Module> GetModules()
+        {
+            List<Module> modules = new List<Module>();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT * FROM Modules";
+                using (var command = new MySqlCommand(query, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        modules.Add(new Module
+                        (
+                            reader.GetInt32("id"), // Pass the 'id' parameter
+                            reader.GetString("Modulis") // Pass the 'ModuleName' parameter
+                        ));
+                    }
+                }
+            }
+            return modules;
+        }
+        public List<Grade> GetGrades()
+        {
+            List<Grade> grades = new List<Grade>();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT * FROM Grades";
+                using (var command = new MySqlCommand(query, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        grades.Add(new Grade(
+                            reader.GetInt32("id"),
+                            reader.GetInt32("StudentId"),
+                            reader.GetInt32("ModuleId"),
+                            reader.GetInt32("Pazymys")
+                        ));
+                    }
+                }
+            }
+            return grades;
+        }
+
+
     }
 }

@@ -8,20 +8,20 @@ namespace Dienynas
 {
     //  Grade klase skirta saugoti ir apdoroti duomenis apie pažymius
  
-    class Grade
+    public class Grade
     {
-        public int id {  get; set; }
-        public int studentId { get; set; }
-        public int moduleId { get; set; }
-        public int grade { get; set; }
+        public int Id {  get; set; }
+        public int StudentId { get; set; }
+        public int ModuleId { get; set; }
+        public int StudentGrade { get; set; }
 
         /// Pažymio konstruktorius
         public Grade(int id, int studentId, int moduleId, int grade)
         {
-            this.id = id;
-            this.studentId = studentId;
-            this.moduleId = moduleId;
-            this.grade = grade;
+            this.Id = id;
+            this.StudentId = studentId;
+            this.ModuleId = moduleId;
+            this.StudentGrade = grade;
         }
     }
 }

@@ -13,33 +13,91 @@ namespace Dienynas
         {
             InitializeComponent();
 
+            // Initialize the database connection and fetch users
             DatabaseManager db = new DatabaseManager();
             db.ConnectAndFetchUsers();
+
+            // Initialize the window and load data
+            Window_Loaded();
         }
 
-                
+        private void Window_Loaded()
+        {
+            // Load data into the DataGrid
+            var students = InOutUtils.GetStudents();
+            var modules = InOutUtils.GetModules();
+            var grades = InOutUtils.GetGrades();
+            StudentDataGrid.ItemsSource = students;
+        }
+        
+        /// Parodo pranešimą su nurodytu tekstu ir pavadinimu.
+
+        public static void ShowMessage(string message, string title)
+        {
+            MessageBox.Show(message, title);
+        }
+
+        
+        /// Uždaro programą.
+        public static void CloseWindow()
+        {
+            Application.Current.Shutdown();
+        }
+
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
         }
 
+       /// TODO: Įvesti naują modulį.
+        private void AddModule_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic to handle adding a module
+            AddModulePanel.Visibility = Visibility.Visible;
+            StudentDataGrid.Visibility = Visibility.Hidden;
+            AddStudentPanel.Visibility = Visibility.Hidden;
+        }
+        private void SubmitNewModule_Click(object sender, RoutedEventArgs e)
+        {
+            // Add your logic for handling the "Submit New Module" button click here
+            string moduleName = ModuleNameTextBox.Text;
+            MessageBox.Show($"New module '{moduleName}' added successfully!");
+        }
         private void AddStudentButton_Click(object sender, RoutedEventArgs e)
         {
+          /// Add student logic here
             StudentDataGrid.Visibility = Visibility.Hidden;
-            // Implement logic to show a form or input fields for adding a new student
+            AddModulePanel.Visibility = Visibility.Hidden;
+            AddStudentPanel.Visibility = Visibility.Visible;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+  
+     
+ 
+        private void SubmitNewStudent_Click(object sender, RoutedEventArgs e)
         {
-            StudentDataGrid.Visibility = Visibility.Hidden;
-            // Implement logic to show a form or input fields for adding a new student
-        }
+            string firstName = FirstNameTextBox.Text;
+            string lastName = LastNameTextBox.Text;
 
-        private void AddStudent_Click(object sender, RoutedEventArgs e)
-        {
-            // Add student logic here
+            if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
+            {
+                if(sbyte.TryParse(FirstNameTextBox.Text, out sbyte result))
+                {
+                    MessageBox.Show("Please enter a valid first name.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                else
+                    InOutUtils.AddStudent(firstName, lastName);
+                AddStudentPanel.Visibility = Visibility.Hidden;
+                StudentDataGrid.Visibility = Visibility.Visible;
+                // Refresh the DataGrid to show the new student
+               // StudentDataGrid.ItemsSource = dashboard.GetStudents();
+            }
+            else
+            {
+                MessageBox.Show("Please enter both first name and last name.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
-
         private void DeleteStudent_Click(object sender, RoutedEventArgs e)
         {
             // Delete student logic here
@@ -57,15 +115,19 @@ namespace Dienynas
 
         private void SearchStudent_Click(object sender, RoutedEventArgs e)
         {
-            // Search student logic here
+            
         }
 
         private void SortStudent_Click(object sender, RoutedEventArgs e)
         {
-            // Sort student logic here
+            AddStudentPanel.Visibility = Visibility.Hidden;
+            AddModulePanel.Visibility = Visibility.Hidden;
+            StudentDataGrid.Visibility = Visibility.Visible;
         }
 
-       
+        private void LastNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
 
+        }
     }
 }

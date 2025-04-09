@@ -24,5 +24,11 @@ namespace Dienynas
         {
             // Tuscias konstruktorius dėl duomenų užpildymo
         }
+
+        public Student(string name, string lastname)
+        {
+            this.Name = name;
+            this.Lastname = lastname;
+        }
     }
 }

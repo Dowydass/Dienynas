@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Dienynas
 {
     //  Modulio objekto klase
-    class Module
+    public class Module
     {
         public int Id { get; set; }
         public string ModuleName { get; set; }
@@ -19,5 +19,7 @@ namespace Dienynas
             this.Id = id;
             this.ModuleName = moduleName;
         }
+
+      
     }
 }
