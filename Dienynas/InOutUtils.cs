@@ -50,7 +50,13 @@ namespace Dienynas
 
             return modules;
         }
-
+        public static void AddModule(string moduleName)
+        {
+            Module module = new Module(0, moduleName); // Create a new Module object
+            DatabaseManager databaseManager = new DatabaseManager();
+            databaseManager.AddModule(module.ModuleName); // Call the DatabaseManager to add the module
+            Console.WriteLine($"Modulis '{moduleName}' sėkmingai pridėtas.");
+        }
         public static List<Grade> GetGrades()
         {
             DatabaseManager dbManager = new DatabaseManager();

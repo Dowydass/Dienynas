@@ -147,6 +147,20 @@ namespace Dienynas
             }
             return modules;
         }
+        public void AddModule(string moduleName)
+        {
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "INSERT INTO Modules (Modulis) VALUES (@modulis)";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@modulis", moduleName);
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("Modulis pridėtas: " + moduleName);
+                }
+            }
+        }
         public List<Grade> GetGrades()
         {
             List<Grade> grades = new List<Grade>();

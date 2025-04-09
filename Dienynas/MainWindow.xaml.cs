@@ -59,9 +59,20 @@ namespace Dienynas
         }
         private void SubmitNewModule_Click(object sender, RoutedEventArgs e)
         {
-            // Add your logic for handling the "Submit New Module" button click here
             string moduleName = ModuleNameTextBox.Text;
-            MessageBox.Show($"New module '{moduleName}' added successfully!");
+
+            if (!string.IsNullOrEmpty(moduleName))
+            {
+                InOutUtils.AddModule(moduleName); // Call the AddModule function
+                AddModulePanel.Visibility = Visibility.Hidden;
+                StudentDataGrid.Visibility = Visibility.Visible;
+
+                MessageBox.Show("Modulis sėkmingai pridėtas!", "Pridėti modulį", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Įveskite modulio pavadinimą.", "Klaida", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         private void AddStudentButton_Click(object sender, RoutedEventArgs e)
         {
