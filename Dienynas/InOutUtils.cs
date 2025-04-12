@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Dienynas
 {
@@ -72,10 +74,13 @@ namespace Dienynas
         }
 
 
-        public void DeleteStudent(int studentId)
+        public static void DeleteStudentFromModule(int studentId, int moduleId)
         {
-            dbManager.DeleteStudent(studentId);
+            DatabaseManager databaseManager = new DatabaseManager();
+            databaseManager.DeleteStudentFromModule(studentId, moduleId);
+            Console.WriteLine($"Studentas ID: {studentId} sėkmingai ištrintas iš modulio ID: {moduleId}.");
         }
+
 
         public void EditStudent(int studentId, string newFirstName, string newLastName)
         {
@@ -101,6 +106,58 @@ namespace Dienynas
                     // Delete student logic here
                 }
         */
-       
+        private void LoadStudentGradesMatrix(DataGrid studentGradesDataGrid)
+        {
+            DatabaseManager dbManager = new DatabaseManager();
+            string[,] matrix = dbManager.GetStudentGradesMatrix();
+            List<string[]> rows = new List<string[]>();
+
+            // Convert 2D array to a list of rows for binding
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                string[] row = new string[matrix.GetLength(1)];
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    row[j] = matrix[i, j];
+                }
+                rows.Add(row);
+            }
+
+            // Bind the rows to the DataGrid
+            studentGradesDataGrid.ItemsSource = rows;
+        }
+        public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
+        {
+            DatabaseManager dbManager = new DatabaseManager();
+            List<Module> modules = dbManager.GetModules();
+
+            // Clear existing columns
+            StudentGradesDataGrid.Columns.Clear();
+
+            // Add a column for the student name
+            StudentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Student Name",
+                Binding = new Binding("[0]")
+            });
+
+            // Add columns for each module
+            for (int i = 0; i < modules.Count; i++)
+            {
+                StudentGradesDataGrid.Columns.Add(new DataGridTextColumn
+                {
+                    Header = modules[i].ModuleName,
+                    Binding = new Binding($"[{i + 1}]")
+                });
+            }
+
+            // Add a column for the average grade
+            StudentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Average",
+                Binding = new Binding($"[{modules.Count + 1}]")
+            });
+        }
+
     }
 }

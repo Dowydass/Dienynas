@@ -19,6 +19,8 @@ namespace Dienynas
 
             // Initialize the window and load data
             Window_Loaded();
+
+
         }
 
         private void Window_Loaded()
@@ -28,7 +30,12 @@ namespace Dienynas
             var modules = InOutUtils.GetModules();
             var grades = InOutUtils.GetGrades();
             StudentDataGrid.ItemsSource = students;
+
+            InOutUtils.ConfigureStudentGradesDataGrid(StudentGradesDataGrid);
+            InOutUtils.LoadStudentGradesMatrix();
+            
         }
+
         
         /// Parodo pranešimą su nurodytu tekstu ir pavadinimu.
 
@@ -77,9 +84,10 @@ namespace Dienynas
         private void AddStudentButton_Click(object sender, RoutedEventArgs e)
         {
           /// Add student logic here
-            StudentDataGrid.Visibility = Visibility.Hidden;
-            AddModulePanel.Visibility = Visibility.Hidden;
-            AddStudentPanel.Visibility = Visibility.Visible;
+            VisibilityManager.Show(AddStudentPanel);
+            VisibilityManager.Hide(AddModulePanel);
+            VisibilityManager.Hide(DeleteStudentFromModulePanel);
+            VisibilityManager.Hide(StudentDataGrid);
         }
 
   
@@ -111,7 +119,40 @@ namespace Dienynas
         }
         private void DeleteStudent_Click(object sender, RoutedEventArgs e)
         {
-            // Delete student logic here
+            DeleteStudentFromModulePanel.Visibility = Visibility.Visible;
+            AddStudentPanel.Visibility = Visibility.Hidden;
+            AddModulePanel.Visibility = Visibility.Hidden;
+            StudentDataGrid.Visibility = Visibility.Hidden;
+
+            // Populate the ComboBoxes
+            DeleteModuleComboBox.ItemsSource = InOutUtils.GetModules();
+            DeleteModuleComboBox.DisplayMemberPath = "ModuleName";
+            DeleteModuleComboBox.SelectedValuePath = "Id";
+
+            DeleteStudentComboBox.ItemsSource = InOutUtils.GetStudents();
+            DeleteStudentComboBox.DisplayMemberPath = "Name";
+            DeleteStudentComboBox.SelectedValuePath = "Id";
+        }
+
+        private void SubmitDeleteStudentFromModule_Click(object sender, RoutedEventArgs e)
+        {
+            if (DeleteModuleComboBox.SelectedValue is int moduleId && DeleteStudentComboBox.SelectedValue is int studentId)
+            {
+                InOutUtils.DeleteStudentFromModule(studentId, moduleId);
+
+                // Refresh the DataGrid
+                var students = InOutUtils.GetStudents();
+                StudentDataGrid.ItemsSource = students;
+
+                DeleteStudentFromModulePanel.Visibility = Visibility.Hidden;
+                StudentDataGrid.Visibility = Visibility.Visible;
+
+                MessageBox.Show("Studentas sėkmingai ištrintas iš modulio!", "Ištrinti studentą iš modulio", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Pasirinkite modulį ir studentą.", "Klaida", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void EditStudent_Click(object sender, RoutedEventArgs e)

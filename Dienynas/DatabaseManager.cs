@@ -1,9 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
-using System.Collections;
+
 using System.Collections.Generic;
-using System.Data;
-using System.Runtime.Remoting.Messaging;
 
 namespace Dienynas
 {
@@ -94,15 +92,16 @@ namespace Dienynas
 
 
         /// TODO: Ištrinti studentą iš duomenų bazės pagal ID.
-        public void DeleteStudent(int id)
+        public void DeleteStudentFromModule(int studentId, int moduleId)
         {
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "DELETE FROM Students WHERE Id = @id";
+                string query = "DELETE FROM Grades WHERE StudentId = @studentId AND ModuleId = @moduleId";
                 using (var command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@studentId", studentId);
+                    command.Parameters.AddWithValue("@moduleId", moduleId);
                     command.ExecuteNonQuery();
                 }
             }
@@ -123,7 +122,8 @@ namespace Dienynas
                 }
             }
         }
-    
+     
+
 
         public List<Module> GetModules()
         {
@@ -183,6 +183,55 @@ namespace Dienynas
                 }
             }
             return grades;
+        }
+        public string[,] GetStudentGradesMatrix()
+        {
+            List<Module> modules = GetModules();
+            List<Student> students = GetStudents();
+            int totalColumns = modules.Count + 2; // Modules + StudentName + Average
+            string[,] matrix = new string[students.Count, totalColumns];
+
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                for (int i = 0; i < students.Count; i++)
+                {
+                    Student student = students[i];
+                    matrix[i, 0] = $"{student.Name} {student.Lastname}"; // Student Name
+
+                    double totalGrades = 0;
+                    int gradeCount = 0;
+
+                    for (int j = 0; j < modules.Count; j++)
+                    {
+                        Module module = modules[j];
+                        string query = "SELECT Pazymys FROM Grades WHERE StudentId = @studentId AND ModuleId = @moduleId";
+                        using (var command = new MySqlCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@studentId", student.Id);
+                            command.Parameters.AddWithValue("@moduleId", module.Id);
+
+                            object result = command.ExecuteScalar();
+                            if (result != null)
+                            {
+                                int grade = Convert.ToInt32(result);
+                                matrix[i, j + 1] = grade.ToString(); // Module grade
+                                totalGrades += grade;
+                                gradeCount++;
+                            }
+                            else
+                            {
+                                matrix[i, j + 1] = "-"; // No grade
+                            }
+                        }
+                    }
+
+                    // Calculate and store the average grade
+                    matrix[i, totalColumns - 1] = gradeCount > 0 ? (totalGrades / gradeCount).ToString("0.00") : "-";
+                }
+            }
+
+            return matrix;
         }
 
 
