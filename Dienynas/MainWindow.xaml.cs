@@ -29,10 +29,9 @@ namespace Dienynas
             var students = InOutUtils.GetStudents();
             var modules = InOutUtils.GetModules();
             var grades = InOutUtils.GetGrades();
-            StudentDataGrid.ItemsSource = students;
 
             InOutUtils.ConfigureStudentGradesDataGrid(StudentGradesDataGrid);
-            InOutUtils.LoadStudentGradesMatrix();
+            InOutUtils.LoadStudentGradesMatrix(StudentGradesDataGrid);
             
         }
 
@@ -60,9 +59,11 @@ namespace Dienynas
         private void AddModule_Click(object sender, RoutedEventArgs e)
         {
             // Logic to handle adding a module
-            AddModulePanel.Visibility = Visibility.Visible;
-            StudentDataGrid.Visibility = Visibility.Hidden;
-            AddStudentPanel.Visibility = Visibility.Hidden;
+            VisibilityManager.Show(AddModulePanel);
+            VisibilityManager.Hide(AddStudentPanel);
+            VisibilityManager.Hide(StudentGradesDataGrid);
+
+            VisibilityManager.Hide(DeleteStudentFromModulePanel);
         }
         private void SubmitNewModule_Click(object sender, RoutedEventArgs e)
         {
@@ -72,7 +73,6 @@ namespace Dienynas
             {
                 InOutUtils.AddModule(moduleName); // Call the AddModule function
                 AddModulePanel.Visibility = Visibility.Hidden;
-                StudentDataGrid.Visibility = Visibility.Visible;
 
                 MessageBox.Show("Modulis sėkmingai pridėtas!", "Pridėti modulį", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -87,7 +87,7 @@ namespace Dienynas
             VisibilityManager.Show(AddStudentPanel);
             VisibilityManager.Hide(AddModulePanel);
             VisibilityManager.Hide(DeleteStudentFromModulePanel);
-            VisibilityManager.Hide(StudentDataGrid);
+            VisibilityManager.Hide(StudentGradesDataGrid);
         }
 
   
@@ -108,7 +108,7 @@ namespace Dienynas
                 else
                     InOutUtils.AddStudent(firstName, lastName);
                 AddStudentPanel.Visibility = Visibility.Hidden;
-                StudentDataGrid.Visibility = Visibility.Visible;
+                
                 // Refresh the DataGrid to show the new student
                // StudentDataGrid.ItemsSource = dashboard.GetStudents();
             }
@@ -122,7 +122,6 @@ namespace Dienynas
             DeleteStudentFromModulePanel.Visibility = Visibility.Visible;
             AddStudentPanel.Visibility = Visibility.Hidden;
             AddModulePanel.Visibility = Visibility.Hidden;
-            StudentDataGrid.Visibility = Visibility.Hidden;
 
             // Populate the ComboBoxes
             DeleteModuleComboBox.ItemsSource = InOutUtils.GetModules();
@@ -142,10 +141,8 @@ namespace Dienynas
 
                 // Refresh the DataGrid
                 var students = InOutUtils.GetStudents();
-                StudentDataGrid.ItemsSource = students;
 
                 DeleteStudentFromModulePanel.Visibility = Visibility.Hidden;
-                StudentDataGrid.Visibility = Visibility.Visible;
 
                 MessageBox.Show("Studentas sėkmingai ištrintas iš modulio!", "Ištrinti studentą iš modulio", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -154,7 +151,12 @@ namespace Dienynas
                 MessageBox.Show("Pasirinkite modulį ir studentą.", "Klaida", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+        private void DeleteDataBase_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseManager db = new DatabaseManager();
+            db.ResetDatabase();
+            MessageBox.Show("Duomenų bazė sėkmingai ištrinta!", "Ištrinti duomenų bazę", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
         private void EditStudent_Click(object sender, RoutedEventArgs e)
         {
             // Edit student logic here
@@ -174,10 +176,24 @@ namespace Dienynas
         {
             AddStudentPanel.Visibility = Visibility.Hidden;
             AddModulePanel.Visibility = Visibility.Hidden;
-            StudentDataGrid.Visibility = Visibility.Visible;
         }
 
         private void LastNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
 
         }

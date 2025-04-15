@@ -9,6 +9,8 @@ using System.Windows.Data;
 
 namespace Dienynas
 {
+
+    /// Klasė, kuri apima įvesties/išvesties funkcijas.
     class InOutUtils
     {
     
@@ -106,13 +108,13 @@ namespace Dienynas
                     // Delete student logic here
                 }
         */
-        private void LoadStudentGradesMatrix(DataGrid studentGradesDataGrid)
+        public static void LoadStudentGradesMatrix(DataGrid studentGradesDataGrid)
         {
             DatabaseManager dbManager = new DatabaseManager();
             string[,] matrix = dbManager.GetStudentGradesMatrix();
             List<string[]> rows = new List<string[]>();
 
-            // Convert 2D array to a list of rows for binding
+            // Pridedame 2D masyvą į eilučių sąrašą, kad galėtume jį pririšti prie DataGrid
             for (int i = 0; i < matrix.GetLength(0); i++)
             {
                 string[] row = new string[matrix.GetLength(1)];
@@ -123,7 +125,7 @@ namespace Dienynas
                 rows.Add(row);
             }
 
-            // Bind the rows to the DataGrid
+            // Pririšame eilučių sąrašą prie DataGrid
             studentGradesDataGrid.ItemsSource = rows;
         }
         public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
@@ -132,19 +134,19 @@ namespace Dienynas
             List<Module> modules = dbManager.GetModules();
 
             // Clear existing columns
-            StudentGradesDataGrid.Columns.Clear();
+            studentGradesDataGrid.Columns.Clear();
 
             // Add a column for the student name
-            StudentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
             {
-                Header = "Student Name",
+                Header = "Studentas",
                 Binding = new Binding("[0]")
             });
 
             // Add columns for each module
             for (int i = 0; i < modules.Count; i++)
             {
-                StudentGradesDataGrid.Columns.Add(new DataGridTextColumn
+                studentGradesDataGrid.Columns.Add(new DataGridTextColumn
                 {
                     Header = modules[i].ModuleName,
                     Binding = new Binding($"[{i + 1}]")
@@ -152,9 +154,9 @@ namespace Dienynas
             }
 
             // Add a column for the average grade
-            StudentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
             {
-                Header = "Average",
+                Header = "Vidurkis",
                 Binding = new Binding($"[{modules.Count + 1}]")
             });
         }

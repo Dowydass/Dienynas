@@ -114,6 +114,7 @@
     <Compile Include="InOutUtils.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Student.cs" />
+    <Compile Include="TaskUtils.cs" />
     <Compile Include="VisibilityManager.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

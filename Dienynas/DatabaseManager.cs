@@ -235,5 +235,70 @@ namespace Dienynas
         }
 
 
+        public void AddGrade(int studentId, int moduleId, int grade)
+        {
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "INSERT INTO Grades (StudentId, ModuleId, Pazymys) VALUES (@studentId, @moduleId, @grade)";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@studentId", studentId);
+                    command.Parameters.AddWithValue("@moduleId", moduleId);
+                    command.Parameters.AddWithValue("@grade", grade);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+        public void ResetDatabase()
+        {
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Drop existing tables
+                string dropTablesQuery = @"
+                    DROP TABLE IF EXISTS Grades;
+                    DROP TABLE IF EXISTS Modules;
+                    DROP TABLE IF EXISTS Students;
+                ";
+                using (var dropCommand = new MySqlCommand(dropTablesQuery, connection))
+                {
+                    dropCommand.ExecuteNonQuery();
+                }
+
+                // Create new tables
+                string createTablesQuery = @"
+                    CREATE TABLE Students (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        Vardas VARCHAR(100) NOT NULL,
+                        Pavarde VARCHAR(100) NOT NULL
+                    );
+
+                    CREATE TABLE Modules (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        Modulis VARCHAR(100) NOT NULL
+                    );
+
+                    CREATE TABLE Grades (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        StudentId INT NOT NULL,
+                        ModuleId INT NOT NULL,
+                        Pazymys INT NOT NULL,
+                        FOREIGN KEY (StudentId) REFERENCES Students(id) ON DELETE CASCADE,
+                        FOREIGN KEY (ModuleId) REFERENCES Modules(id) ON DELETE CASCADE
+                    );
+                ";
+                using (var createCommand = new MySqlCommand(createTablesQuery, connection))
+                {
+                    createCommand.ExecuteNonQuery();
+                }
+
+                Console.WriteLine("Database reset completed: All tables dropped and recreated.");
+                MainWindow.ShowMessage("Duomenų bazė atstatyta: visos lentelės ištrintos ir sukurtos iš naujo.", "Sėkmingai");
+            }
+        }
     }
 }

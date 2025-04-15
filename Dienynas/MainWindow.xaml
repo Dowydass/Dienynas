@@ -5,21 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Dienynas"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="469" Width="800">
     <Grid>
-        <Menu VerticalAlignment="Top">
+        <Menu VerticalAlignment="Top" Height="23" FontSize="14">
             <MenuItem Header="Studentas">
                 <MenuItem Header="Pridėti studentą" Click="AddStudentButton_Click"/>
                 <MenuItem Header="Pridėti modulį" Click="AddModule_Click"/>
-               
+
                 <MenuItem Header="Ištrinti studentą" Click="DeleteStudent_Click"/>
                 <MenuItem Header="Pridėti pažymį" Click="AddGrade_Click"/>
                 <MenuItem Header="Paieška" Click="SearchStudent_Click"/>
                 <MenuItem Header="Rūšiavimas" Click="SortStudent_Click"/>
             </MenuItem>
+            <MenuItem Header="Duomenų bazė">
+                <MenuItem Header="Ištrinti visus duomenis" Click="DeleteDataBase_Click"/>
+            </MenuItem>
         </Menu>
-        <DataGrid  Visibility="Visible" x:Name="StudentDataGrid" d:ItemsSource="{d:SampleData ItemCount=10}" Margin="10,30,10,10" SelectionChanged="DataGrid_SelectionChanged"/>
-        <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,30,10,10" />
+        <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,53,10,10" />
 
         <!-- Input fields for adding a new student -->
         <StackPanel x:Name="AddStudentPanel" Visibility="Hidden" Margin="0,0,0,10">
@@ -31,7 +33,7 @@
                 <Label Content="Label"/>
             </Button>
         </StackPanel>
-        
+
         <StackPanel x:Name="AddModulePanel" Visibility="Hidden" Margin="0,0,0,10">
             <Label Content="Modulio pavadinimas" Margin="150,50,150,0"/>
             <TextBox x:Name="ModuleNameTextBox" Text="Module Name" Margin="150,0,150,10"/>
@@ -48,6 +50,11 @@
                 <Label Content="Ištrinti studentą iš modulio"/>
             </Button>
         </StackPanel>
-        
+        <TextBox HorizontalAlignment="Left" Margin="10,28,0,0" TextWrapping="Wrap" Text="Example" VerticalAlignment="Top" Width="248" Height="20" FontSize="13" VerticalContentAlignment="Center" TextChanged="TextBox_TextChanged">
+            <TextBox.Style>
+                <Style/>
+            </TextBox.Style>
+        </TextBox>
+
     </Grid>
 </Window>
