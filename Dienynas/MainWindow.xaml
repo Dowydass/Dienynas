@@ -21,7 +21,7 @@
                 <MenuItem Header="Ištrinti visus duomenis" Click="DeleteDataBase_Click"/>
             </MenuItem>
         </Menu>
-        <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,53,10,10" />
+        <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,53,10,10" IsSynchronizedWithCurrentItem="True" />
 
         <!-- Input fields for adding a new student -->
         <StackPanel x:Name="AddStudentPanel" Visibility="Hidden" Margin="0,0,0,10">
@@ -50,10 +50,9 @@
                 <Label Content="Ištrinti studentą iš modulio"/>
             </Button>
         </StackPanel>
-        <TextBox HorizontalAlignment="Left" Margin="10,28,0,0" TextWrapping="Wrap" Text="Example" VerticalAlignment="Top" Width="248" Height="20" FontSize="13" VerticalContentAlignment="Center" TextChanged="TextBox_TextChanged">
-            <TextBox.Style>
-                <Style/>
-            </TextBox.Style>
+        <TextBox x:Name="SearchBar_TextBox" HorizontalAlignment="Left" Margin="10,28,0,0" 
+         TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="186" Height="20" 
+         FontSize="13" VerticalContentAlignment="Center" TextChanged="TextBox_TextChanged">
         </TextBox>
 
     </Grid>

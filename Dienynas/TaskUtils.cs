@@ -11,5 +11,17 @@ namespace Dienynas
     class TaskUtils
 
     {
+        public static List<Student> SortStudentsByName(List<Student> students, bool ascending = true)
+        {
+            return ascending
+                ? students.OrderBy(student => student.Name).ToList()
+                : students.OrderByDescending(student => student.Name).ToList();
+        }
+        public static List<Student> SortStudentsBySurname(List<Student> students, bool ascending = true)
+        {
+            return ascending
+                ? students.OrderBy(student => student.Lastname).ToList()
+                : students.OrderByDescending(student => student.Lastname).ToList();
+        }
     }
 }

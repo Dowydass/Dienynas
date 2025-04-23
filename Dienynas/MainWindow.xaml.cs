@@ -16,7 +16,7 @@ namespace Dienynas
             // Initialize the database connection and fetch users
             DatabaseManager db = new DatabaseManager();
             db.ConnectAndFetchUsers();
-
+            DataContext = this;
             // Initialize the window and load data
             Window_Loaded();
 
@@ -41,6 +41,7 @@ namespace Dienynas
         public static void ShowMessage(string message, string title)
         {
             MessageBox.Show(message, title);
+
         }
 
         
@@ -73,8 +74,10 @@ namespace Dienynas
             {
                 InOutUtils.AddModule(moduleName); // Call the AddModule function
                 AddModulePanel.Visibility = Visibility.Hidden;
+                // Refresh the DataGrid to show the new module
 
                 MessageBox.Show("Modulis sėkmingai pridėtas!", "Pridėti modulį", MessageBoxButton.OK, MessageBoxImage.Information);
+                VisibilityManager.Show(StudentGradesDataGrid);
             }
             else
             {
@@ -106,11 +109,18 @@ namespace Dienynas
                     return;
                 }
                 else
+                    
                     InOutUtils.AddStudent(firstName, lastName);
                 AddStudentPanel.Visibility = Visibility.Hidden;
-                
-                // Refresh the DataGrid to show the new student
-               // StudentDataGrid.ItemsSource = dashboard.GetStudents();
+
+                MessageBox.Show("Studentas sėkmingai pridėtas!", "Pridėti studentą", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Refresh the DataGrid to show the new student  
+
+                StudentGradesDataGrid.ItemsSource = InOutUtils.GetStudents();
+                Window_Loaded();
+                VisibilityManager.Show(StudentGradesDataGrid);
+
+              
             }
             else
             {
@@ -167,10 +177,7 @@ namespace Dienynas
             // Add grade logic here
         }
 
-        private void SearchStudent_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
+      
 
         private void SortStudent_Click(object sender, RoutedEventArgs e)
         {
@@ -185,8 +192,28 @@ namespace Dienynas
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+       
+            string query = SearchBar_TextBox.Text;
+            
+            if (!string.IsNullOrEmpty(query))
+            {
+                // Get students from the database
+                var students = InOutUtils.SearchStudents(query);
 
+                // Sort the students by name (ascending)
+                var sortedStudents = TaskUtils.SortStudentsByName(students);
+
+                // Update the DataGrid with the sorted students
+                StudentGradesDataGrid.ItemsSource = sortedStudents;
+            }
+            else
+            {
+                // If the search bar is empty, reload all students
+                var allStudents = InOutUtils.GetStudents();
+                StudentGradesDataGrid.ItemsSource = allStudents;
+            }
         }
+        
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -196,6 +223,26 @@ namespace Dienynas
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+        private void SearchStudent_Click(object sender, RoutedEventArgs e)
+        {
+            string query = SearchBar_TextBox.Text;
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                // Get students from the database
+                var students = InOutUtils.SearchStudents(query);
+
+                // Sort the students by name (ascending)
+                var sortedStudents = TaskUtils.SortStudentsByName(students);
+
+                // Update the DataGrid with the sorted students
+                StudentGradesDataGrid.ItemsSource = sortedStudents;
+            }
+            else
+            {
+                MessageBox.Show("Įveskite paieškos užklausą.", "Klaida", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }

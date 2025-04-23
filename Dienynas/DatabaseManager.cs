@@ -27,7 +27,7 @@ namespace Dienynas
 
                     while (reader.Read())
                     {
-                       
+
                     }
 
                     reader.Close();
@@ -72,7 +72,7 @@ namespace Dienynas
         }
 
 
-       
+
         /// UNDONE: Prideda studentą į duomenų bazę.
         public void AddStudent(string vardas, string pavarde)
         {
@@ -122,7 +122,7 @@ namespace Dienynas
                 }
             }
         }
-     
+
 
 
         public List<Module> GetModules()
@@ -251,8 +251,66 @@ namespace Dienynas
             }
         }
 
+        public List<Student> SearchStudentsInDatabase(string query)
+        {
+            List<Student> students = new List<Student>();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string queryText = "SELECT * FROM Students WHERE Vardas LIKE @query OR Pavarde LIKE @query";
+                using (var command = new MySqlCommand(queryText, connection))
+                {
+                    command.Parameters.AddWithValue("@query", "%" + query + "%");
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            students.Add(new Student
+                            {
+                                Id = reader.GetInt32("id"),
+                                Name = reader.GetString("Vardas"),
+                                Lastname = reader.GetString("Pavarde")
+                            });
+                        }
+                    }
+                }
+            }
+            return students;
+        }
 
-        public void ResetDatabase()
+        /// <summary>
+        /// Dynamically searches for students by their first name.
+        /// </summary>
+        /// <param name="name">The name or partial name of the student to search for.</param>
+        /// <returns>A list of students matching the search criteria.</returns>
+        public List<Student> SearchStudentsByName(string name)
+        {
+            List<Student> students = new List<Student>();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT * FROM Students WHERE Vardas LIKE @name";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@name", "%" + name + "%");
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            students.Add(new Student
+                            {
+                                Id = reader.GetInt32("id"),
+                                Name = reader.GetString("Vardas"),
+                                Lastname = reader.GetString("Pavarde")
+                            });
+                        }
+                    }
+                }
+            }
+            return students;
+        }
+
+            public void ResetDatabase()
         {
             using (var connection = new MySqlConnection(connectionString))
             {

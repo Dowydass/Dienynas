@@ -128,7 +128,7 @@ namespace Dienynas
             // Pririšame eilučių sąrašą prie DataGrid
             studentGradesDataGrid.ItemsSource = rows;
         }
-        public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
+        /* public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
         {
             DatabaseManager dbManager = new DatabaseManager();
             List<Module> modules = dbManager.GetModules();
@@ -161,5 +161,60 @@ namespace Dienynas
             });
         }
 
+        */
+        public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
+        {
+            DatabaseManager dbManager = new DatabaseManager();
+            List<Module> modules = dbManager.GetModules();
+            string[,] matrix = dbManager.GetStudentGradesMatrix();
+
+            // Clear existing columns  
+            studentGradesDataGrid.Columns.Clear();
+
+            // Add a column for the student name  
+            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Student",
+                Binding = new Binding($"[{0}]") // First column: Student name  
+            });
+
+            // Add columns for each module  
+            for (int i = 0; i < modules.Count; i++)
+            {
+                studentGradesDataGrid.Columns.Add(new DataGridTextColumn
+                {
+                    Header = modules[i].ModuleName,
+                    Binding = new Binding($"[{i + 1}]") // Module grades  
+                });
+            }
+
+            // Add a column for the average grade  
+            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Average",
+                Binding = new Binding($"[{modules.Count + 1}]") // Last column: Average grade  
+            });
+
+            // Prepare rows for DataGrid  
+            List<object[]> rows = new List<object[]>();
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                object[] row = new object[matrix.GetLength(1)];
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    row[j] = matrix[i, j];
+                }
+                rows.Add(row);
+            }
+
+            // Bind rows to DataGrid  
+            studentGradesDataGrid.ItemsSource = rows.Select(r => new { Values = r }).ToList();
+        }
+
+        public static List<Student> SearchStudents(string query)
+        {
+            DatabaseManager dbManager = new DatabaseManager();
+            return dbManager.SearchStudentsInDatabase(query);
+        }
     }
 }
