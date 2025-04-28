@@ -8,20 +8,22 @@
         Title="MainWindow" Height="469" Width="800">
     <Grid>
         <Menu VerticalAlignment="Top" Height="23" FontSize="14">
+
+			<MenuItem Header="Paieška" Click="SearchStudent_Click"></MenuItem>
             <MenuItem Header="Studentas">
                 <MenuItem Header="Pridėti studentą" Click="AddStudentButton_Click"/>
                 <MenuItem Header="Pridėti modulį" Click="AddModule_Click"/>
 
                 <MenuItem Header="Ištrinti studentą" Click="DeleteStudent_Click"/>
                 <MenuItem Header="Pridėti pažymį" Click="AddGrade_Click"/>
-                <MenuItem Header="Paieška" Click="SearchStudent_Click"/>
+              
                 <MenuItem Header="Rūšiavimas" Click="SortStudent_Click"/>
             </MenuItem>
             <MenuItem Header="Duomenų bazė">
                 <MenuItem Header="Ištrinti visus duomenis" Click="DeleteDataBase_Click"/>
             </MenuItem>
         </Menu>
-        <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,53,10,10" IsSynchronizedWithCurrentItem="True" />
+       <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,53,10,10" IsSynchronizedWithCurrentItem="True"/>
 
         <!-- Input fields for adding a new student -->
         <StackPanel x:Name="AddStudentPanel" Visibility="Hidden" Margin="0,0,0,10">
@@ -50,7 +52,21 @@
                 <Label Content="Ištrinti studentą iš modulio"/>
             </Button>
         </StackPanel>
-        <TextBox x:Name="SearchBar_TextBox" HorizontalAlignment="Left" Margin="10,28,0,0" 
+		<!-- Add this alongside your other panels -->
+		<StackPanel x:Name="EditGradePanel" Visibility="Collapsed" Margin="10">
+			<TextBlock Text="Redaguoti pažymį" FontSize="16" Margin="0,0,0,10"/>
+			<ComboBox x:Name="EditModuleComboBox" Margin="0,5"
+					  DisplayMemberPath="ModuleName"
+					  SelectionChanged="EditModuleComboBox_SelectionChanged"/>
+			<ComboBox x:Name="EditStudentComboBox" Margin="0,5"
+					  DisplayMemberPath="Name"/>
+			<TextBox x:Name="NewGradeTextBox" Margin="0,5"
+					 ToolTip="Naujas pažymys"/>
+			<Button Content="Išsaugoti" Click="SubmitEditGrade_Click" Margin="0,5"/>
+		</StackPanel>
+		
+		
+		<TextBox x:Name="SearchBar_TextBox" HorizontalAlignment="Left" Margin="10,28,0,0" 
          TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="186" Height="20" 
          FontSize="13" VerticalContentAlignment="Center" TextChanged="TextBox_TextChanged">
         </TextBox>
