@@ -1,0 +1,12 @@
+<!-- Add this alongside your other panels -->
+<StackPanel x:Name="EditGradePanel" Visibility="Collapsed" Margin="10">
+    <TextBlock Text="Redaguoti pažym?" FontSize="16" Margin="0,0,0,10"/>
+    <ComboBox x:Name="EditModuleComboBox" Margin="0,5" 
+              DisplayMemberPath="ModuleName" 
+              SelectionChanged="EditModuleComboBox_SelectionChanged"/>
+    <ComboBox x:Name="EditStudentComboBox" Margin="0,5"
+              DisplayMemberPath="Name"/>
+    <TextBox x:Name="NewGradeTextBox" Margin="0,5"
+             PlaceholderText="Naujas pažymys"/>
+    <Button Content="Išsaugoti" Click="SubmitEditGrade_Click" Margin="0,5"/>
+</StackPanel>

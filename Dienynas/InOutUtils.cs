@@ -1,172 +1,151 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace Dienynas
 {
-
-    /// Klasė, kuri apima įvesties/išvesties funkcijas.
-    class InOutUtils
+    /// <summary>
+    /// Class that handles input/output operations for the application.
+    /// </summary>
+    public class InOutUtils
     {
-    
-   
-        private DatabaseManager dbManager = new DatabaseManager();
+        private static readonly DatabaseManager _dbManager = new DatabaseManager();
 
+        /// <summary>
+        /// Adds a new student to the database.
+        /// </summary>
+        /// <param name="firstName">Student's first name</param>
+        /// <param name="lastName">Student's last name</param>
         public static void AddStudent(string firstName, string lastName)
         {
-            Student student = new Student(firstName, lastName);
-            DatabaseManager databaseManager = new DatabaseManager();
-            databaseManager.AddStudent(student.Name, student.Lastname);
+            try
+            {
+                Student student = new Student(firstName, lastName);
+                _dbManager.AddStudent(student.Name, student.Lastname);
+                Console.WriteLine($"Student added: {firstName} {lastName}");
+            }
+            catch (ArgumentException)
+            {
+                // The validation error is already shown via popup in Student.ValidateWithPopup
+                // We're just catching it here to prevent the application from crashing
+            }
         }
+
+        /// <summary>
+        /// Retrieves all students from the database.
+        /// </summary>
+        /// <returns>A list of all students</returns>
         public static List<Student> GetStudents()
         {
-
-            DatabaseManager dbManager = new DatabaseManager();
-            dbManager.GetStudents();
-            List<Student> students = dbManager.GetStudents();
-           
-            Console.WriteLine("Studentai:");
+            List<Student> students = _dbManager.GetStudents();
+            
+            Console.WriteLine("Students:");
             foreach (var student in students)
             {
-                Console.WriteLine($"ID: {student.Id}, Vardas: {student.Name}, Pavardė: {student.Lastname}");
+                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Surname: {student.Lastname}");
             }
             return students;
-
-
         }
+
+        /// <summary>
+        /// Retrieves all modules from the database.
+        /// </summary>
+        /// <returns>A list of all modules</returns>
         public static List<Module> GetModules()
         {
-         DatabaseManager dbManager = new DatabaseManager();
-            dbManager.GetModules();
-            List<Module> modules = dbManager.GetModules();
-         
-            Console.WriteLine("Moduliai:");
+            List<Module> modules = _dbManager.GetModules();
+            
+            Console.WriteLine("Modules:");
             foreach (var module in modules)
             {
-                Console.WriteLine($"ID: {module.Id}, Pavadinimas: {module.ModuleName}");
+                Console.WriteLine($"ID: {module.Id}, Name: {module.ModuleName}");
             }
-
-
             return modules;
         }
+
+        /// <summary>
+        /// Adds a new module to the database.
+        /// </summary>
+        /// <param name="moduleName">Name of the module to add</param>
         public static void AddModule(string moduleName)
         {
-            Module module = new Module(0, moduleName); // Create a new Module object
-            DatabaseManager databaseManager = new DatabaseManager();
-            databaseManager.AddModule(module.ModuleName); // Call the DatabaseManager to add the module
-            Console.WriteLine($"Modulis '{moduleName}' sėkmingai pridėtas.");
+            _dbManager.AddModule(moduleName);
+            Console.WriteLine($"Module '{moduleName}' successfully added.");
         }
+
+        /// <summary>
+        /// Retrieves all grades from the database.
+        /// </summary>
+        /// <returns>A list of all grades</returns>
         public static List<Grade> GetGrades()
         {
-            DatabaseManager dbManager = new DatabaseManager();
-            dbManager.GetGrades();
-            List<Grade> grades = dbManager.GetGrades();
+            List<Grade> grades = _dbManager.GetGrades();
 
-            Console.WriteLine("Įvertinimai:");
+            Console.WriteLine("Grades:");
             foreach (var grade in grades)
             {
-                Console.WriteLine($"ID: {grade.Id}, Student ID: {grade.StudentId}, Module ID: {grade.ModuleId}, Įvertinimas: {grade.StudentGrade}");
+                Console.WriteLine($"ID: {grade.Id}, Student ID: {grade.StudentId}, Module ID: {grade.ModuleId}, Grade: {grade.StudentGrade}");
             }
             return grades;
         }
 
-
+        /// <summary>
+        /// Deletes a student's grade for a specific module.
+        /// </summary>
+        /// <param name="studentId">The ID of the student</param>
+        /// <param name="moduleId">The ID of the module</param>
         public static void DeleteStudentFromModule(int studentId, int moduleId)
         {
-            DatabaseManager databaseManager = new DatabaseManager();
-            databaseManager.DeleteStudentFromModule(studentId, moduleId);
-            Console.WriteLine($"Studentas ID: {studentId} sėkmingai ištrintas iš modulio ID: {moduleId}.");
+            _dbManager.DeleteStudentFromModule(studentId, moduleId);
+            Console.WriteLine($"Student ID: {studentId} successfully removed from module ID: {moduleId}.");
         }
 
-
-        public void EditStudent(int studentId, string newFirstName, string newLastName)
+        /// <summary>
+        /// Updates student information.
+        /// </summary>
+        /// <param name="studentId">The ID of the student to update</param>
+        /// <param name="newFirstName">The new first name</param>
+        /// <param name="newLastName">The new last name</param>
+        public static void EditStudent(int studentId, string newFirstName, string newLastName)
         {
-            dbManager.UpdateStudent(studentId, newFirstName, newLastName);
+            _dbManager.UpdateStudent(studentId, newFirstName, newLastName);
         }
 
-        public void AddGrade(int studentId, int moduleId, double grade)
+        /// <summary>
+        /// Adds a grade for a student in a specific module.
+        /// </summary>
+        /// <param name="studentId">The student's ID</param>
+        /// <param name="moduleId">The module's ID</param>
+        /// <param name="grade">The grade value</param>
+        public static void AddGrade(int studentId, int moduleId, int grade)
         {
-           // dbManager.AssignGrade(studentId, moduleId, grade);
+            _dbManager.AddGrade(studentId, moduleId, grade);
         }
-        /*
-                public List<Student> SearchStudents(string query)
-                {
-                    return dbManager.SearchStudents(query);
-                }
 
-                public List<Student> SortStudents(string column, bool ascending)
-                {
-                    return dbManager.SortStudents(column, ascending);
-                }
-          private void DeleteStudent_Click(object sender, RoutedEventArgs e)
-                {
-                    // Delete student logic here
-                }
-        */
+        /// <summary>
+        /// Loads the student grades matrix into a DataGrid.
+        /// </summary>
+        /// <param name="studentGradesDataGrid">The DataGrid to load the data into</param>
         public static void LoadStudentGradesMatrix(DataGrid studentGradesDataGrid)
         {
-            DatabaseManager dbManager = new DatabaseManager();
-            string[,] matrix = dbManager.GetStudentGradesMatrix();
-            List<string[]> rows = new List<string[]>();
-
-            // Pridedame 2D masyvą į eilučių sąrašą, kad galėtume jį pririšti prie DataGrid
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                string[] row = new string[matrix.GetLength(1)];
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                {
-                    row[j] = matrix[i, j];
-                }
-                rows.Add(row);
-            }
-
-            // Pririšame eilučių sąrašą prie DataGrid
+            string[,] matrix = _dbManager.GetStudentGradesMatrix();
+            List<string[]> rows = TaskUtils.ConvertMatrixToRows(matrix);
+            
+            // Bind rows to DataGrid
             studentGradesDataGrid.ItemsSource = rows;
         }
-        /* public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
-        {
-            DatabaseManager dbManager = new DatabaseManager();
-            List<Module> modules = dbManager.GetModules();
 
-            // Clear existing columns
-            studentGradesDataGrid.Columns.Clear();
-
-            // Add a column for the student name
-            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
-            {
-                Header = "Studentas",
-                Binding = new Binding("[0]")
-            });
-
-            // Add columns for each module
-            for (int i = 0; i < modules.Count; i++)
-            {
-                studentGradesDataGrid.Columns.Add(new DataGridTextColumn
-                {
-                    Header = modules[i].ModuleName,
-                    Binding = new Binding($"[{i + 1}]")
-                });
-            }
-
-            // Add a column for the average grade
-            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
-            {
-                Header = "Vidurkis",
-                Binding = new Binding($"[{modules.Count + 1}]")
-            });
-        }
-
-        */
+        /// <summary>
+        /// Configures the DataGrid columns for student grades and loads the data.
+        /// </summary>
+        /// <param name="studentGradesDataGrid">The DataGrid to configure</param>
         public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
         {
-            DatabaseManager dbManager = new DatabaseManager();
-            List<Module> modules = dbManager.GetModules();
-            string[,] matrix = dbManager.GetStudentGradesMatrix();
+            List<Module> modules = _dbManager.GetModules();
+            string[,] matrix = _dbManager.GetStudentGradesMatrix();
 
             // Clear existing columns  
             studentGradesDataGrid.Columns.Clear();
@@ -195,26 +174,57 @@ namespace Dienynas
                 Binding = new Binding($"[{modules.Count + 1}]") // Last column: Average grade  
             });
 
-            // Prepare rows for DataGrid  
-            List<object[]> rows = new List<object[]>();
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                object[] row = new object[matrix.GetLength(1)];
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                {
-                    row[j] = matrix[i, j];
-                }
-                rows.Add(row);
-            }
-
-            // Bind rows to DataGrid  
-            studentGradesDataGrid.ItemsSource = rows.Select(r => new { Values = r }).ToList();
+            // Prepare and bind rows to DataGrid
+            List<string[]> rows = TaskUtils.ConvertMatrixToRows(matrix);
+            studentGradesDataGrid.ItemsSource = rows;
         }
 
+        /// <summary>
+        /// Searches for students in the database.
+        /// </summary>
+        /// <param name="query">The search query</param>
+        /// <returns>A list of students matching the search criteria</returns>
         public static List<Student> SearchStudents(string query)
         {
-            DatabaseManager dbManager = new DatabaseManager();
-            return dbManager.SearchStudentsInDatabase(query);
+            return _dbManager.SearchStudentsInDatabase(query);
+        }
+
+        /// <summary>
+        /// Searches for students in the matrix and returns the filtered rows.
+        /// </summary>
+        /// <param name="query">The name or partial name to search for</param>
+        /// <returns>A list of filtered rows from the matrix</returns>
+        public static List<string[]> SearchStudentsInMatrix(string query)
+        {
+            string[,] filteredMatrix = _dbManager.SearchStudentsInMatrix(query);
+            return TaskUtils.ConvertMatrixToRows(filteredMatrix);
+        }
+
+        /// <summary>
+        /// Handles the deletion of a student from a module.
+        /// </summary>
+        /// <param name="moduleSelectedValue">The selected module value</param>
+        /// <param name="studentSelectedValue">The selected student value</param>
+        /// <returns>True if deletion was successful, false otherwise</returns>
+        public static bool HandleStudentModuleDeletion(object moduleSelectedValue, object studentSelectedValue)
+        {
+            if (moduleSelectedValue is int moduleId && studentSelectedValue is int studentId)
+            {
+                DeleteStudentFromModule(studentId, moduleId);
+                MessageBox.Show("Student's grade has been deleted from the module!", 
+                    "Delete Student Grade from Module", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Information);
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("Please select a module and a student.", 
+                    "Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+                return false;
+            }
         }
     }
 }
