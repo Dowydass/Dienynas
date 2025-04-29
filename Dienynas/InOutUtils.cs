@@ -41,7 +41,7 @@ namespace Dienynas
         public static List<Student> GetStudents()
         {
             List<Student> students = _dbManager.GetStudents();
-            
+
             Console.WriteLine("Students:");
             foreach (var student in students)
             {
@@ -57,7 +57,7 @@ namespace Dienynas
         public static List<Module> GetModules()
         {
             List<Module> modules = _dbManager.GetModules();
-            
+
             Console.WriteLine("Modules:");
             foreach (var module in modules)
             {
@@ -72,8 +72,20 @@ namespace Dienynas
         /// <param name="moduleName">Name of the module to add</param>
         public static void AddModule(string moduleName)
         {
-            _dbManager.AddModule(moduleName);
-            Console.WriteLine($"Module '{moduleName}' successfully added.");
+            try
+            {
+                // Validate module name
+                if (Module.IsValidModuleName(moduleName))
+                {
+                    _dbManager.AddModule(moduleName);
+                    Console.WriteLine($"Module '{moduleName}' successfully added.");
+                }
+            }
+            catch (ArgumentException)
+            {
+                // The validation error is already shown via popup in Module.ValidateWithPopup
+                // We're just catching it here to prevent the application from crashing
+            }
         }
 
         /// <summary>
@@ -115,11 +127,15 @@ namespace Dienynas
         }
 
         /// <summary>
-        /// Adds a grade for a student in a specific module.
+        /// Adds a grade for a student in any module.
         /// </summary>
         /// <param name="studentId">The student's ID</param>
         /// <param name="moduleId">The module's ID</param>
         /// <param name="grade">The grade value</param>
+        /// <remarks>
+        /// This method allows adding grades for any valid student and module combination,
+        /// automatically creating the student-module relationship if it doesn't already exist.
+        /// </remarks>
         public static void AddGrade(int studentId, int moduleId, int grade)
         {
             _dbManager.AddGrade(studentId, moduleId, grade);
@@ -133,7 +149,7 @@ namespace Dienynas
         {
             string[,] matrix = _dbManager.GetStudentGradesMatrix();
             List<string[]> rows = TaskUtils.ConvertMatrixToRows(matrix);
-            
+
             // Bind rows to DataGrid
             studentGradesDataGrid.ItemsSource = rows;
         }
@@ -211,20 +227,118 @@ namespace Dienynas
             if (moduleSelectedValue is int moduleId && studentSelectedValue is int studentId)
             {
                 DeleteStudentFromModule(studentId, moduleId);
-                MessageBox.Show("Student's grade has been deleted from the module!", 
-                    "Delete Student Grade from Module", 
-                    MessageBoxButton.OK, 
+                MessageBox.Show("Student's grade has been deleted from the module!",
+                    "Delete Student Grade from Module",
+                    MessageBoxButton.OK,
                     MessageBoxImage.Information);
                 return true;
             }
             else
             {
-                MessageBox.Show("Please select a module and a student.", 
-                    "Error", 
-                    MessageBoxButton.OK, 
+                MessageBox.Show("Please select a module and a student.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Handles adding a new grade for a student in a module.
+        /// </summary>
+        /// <param name="moduleSelectedValue">The selected module value</param>
+        /// <param name="studentSelectedValue">The selected student value</param>
+        /// <param name="gradeText">The grade to add</param>
+        /// <returns>True if the grade was added successfully, false otherwise</returns>
+        public static bool HandleAddGrade(object moduleSelectedValue, object studentSelectedValue, string gradeText)
+        {
+            if (!(moduleSelectedValue is int moduleId) || !(studentSelectedValue is int studentId))
+            {
+                MessageBox.Show("Please select a module and a student.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return false;
+            }
+
+            if (!int.TryParse(gradeText, out int grade) || grade < 0 || grade > 10)
+            {
+                MessageBox.Show("Grade must be a number between 0 and 10.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return false;
+            }
+
+            AddGrade(studentId, moduleId, grade);
+            MessageBox.Show("Įvertinimas sėkmingai pridėtas!",
+                "Pridėti Pažymį",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return true;
+        }
+
+        /// <summary>
+        /// Deletes a student entirely from the database, including all their grades.
+        /// </summary>
+        /// <param name="studentId">The ID of the student to delete</param>
+        /// <returns>True if deletion was successful, false otherwise</returns>
+        public static bool DeleteStudent(int studentId)
+        {
+            return _dbManager.DeleteStudent(studentId);
+        }
+
+        /// <summary>
+        /// Handles the deletion of a student from the system.
+        /// </summary>
+        /// <param name="studentSelectedValue">The selected student value</param>
+        /// <returns>True if deletion was successful, false otherwise</returns>
+        public static bool HandleStudentDeletion(object studentSelectedValue)
+        {
+            if (studentSelectedValue is int studentId)
+            {
+                // Confirm deletion with the user
+                MessageBoxResult result = MessageBox.Show(
+                    "Ar tikrai norite ištrinti šį studentą ir visus jo pažymius?",
+                    "Patvirtinti ištrynimą",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    bool success = DeleteStudent(studentId);
+                    if (success)
+                    {
+                        MessageBox.Show("Studentas ir visi jo pažymiai sėkmingai ištrinti!",
+
+
+                            "Ištrinti studentą",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                        return true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Nepavyko ištrinti studento. Patikrinkite, ar studentas egzistuoja.",
+                            "Klaida",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return false;
+                    }
+                }
+                return false;
+            }
+            else
+            {
+                MessageBox.Show("Prašome pasirinkti studentą.",
+                    "Klaida",
+                    MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return false;
             }
         }
     }
+
+
 }
+

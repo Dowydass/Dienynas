@@ -5,71 +5,320 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Dienynas"
         mc:Ignorable="d"
-        Title="MainWindow" Height="469" Width="800">
+        Title="Dienynas - Studentų Informacijos Sistema" Height="600" Width="900"
+        Background="{StaticResource BackgroundColor}"
+        WindowStartupLocation="CenterScreen">
+    
     <Grid>
-        <Menu VerticalAlignment="Top" Height="23" FontSize="14">
-
-			<MenuItem Header="Paieška" Click="SearchStudent_Click"></MenuItem>
-            <MenuItem Header="Studentas">
-                <MenuItem Header="Pridėti studentą" Click="AddStudentButton_Click"/>
-                <MenuItem Header="Pridėti modulį" Click="AddModule_Click"/>
-
-                <MenuItem Header="Ištrinti studentą" Click="DeleteStudent_Click"/>
-                <MenuItem Header="Pridėti pažymį" Click="AddGrade_Click"/>
-              
-                <MenuItem Header="Rūšiavimas" Click="SortStudent_Click"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Main Menu -->
+        <Menu Grid.Row="0" Background="{StaticResource PrimaryColor}" Foreground="White" 
+              Height="30" FontSize="14" FontWeight="SemiBold">
+            <MenuItem Header="Paieška" Foreground="White" Click="SearchStudent_Click">
+                <MenuItem.Icon>
+                    <TextBlock Text="🔍" FontSize="14"/>
+                </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Duomenų bazė">
-                <MenuItem Header="Ištrinti visus duomenis" Click="DeleteDataBase_Click"/>
+            <MenuItem Header="Studentai" Foreground="White">
+                <MenuItem.Icon>
+                    <TextBlock Text="👥" FontSize="14"/>
+                </MenuItem.Icon>
+                <MenuItem Header="Pridėti studentą" Click="AddStudentButton_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="➕" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Ištrinti studentą iš modulio" Click="DeleteStudent_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="✂" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Ištrinti studentą visiškai" Click="DeleteStudentEntirely_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="❌" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Rūšiavimas" Click="SortStudent_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🔄" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Moduliai" Foreground="White">
+                <MenuItem.Icon>
+                    <TextBlock Text="📚" FontSize="14"/>
+                </MenuItem.Icon>
+                <MenuItem Header="Pridėti modulį" Click="AddModule_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="➕" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Pažymiai" Foreground="White">
+                <MenuItem.Icon>
+                    <TextBlock Text="📝" FontSize="14"/>
+                </MenuItem.Icon>
+                <MenuItem Header="Pridėti pažymį" Click="AddGrade_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="➕" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Redaguoti pažymį" Click="EditStudent_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="✏" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Duomenų bazė" Foreground="White">
+                <MenuItem.Icon>
+                    <TextBlock Text="💾" FontSize="14"/>
+                </MenuItem.Icon>
+                <MenuItem Header="Ištrinti visus duomenis" Click="DeleteDataBase_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="⚠" FontSize="14" Foreground="{StaticResource WarningColor}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
-       <DataGrid  Visibility="Visible" x:Name="StudentGradesDataGrid" AutoGenerateColumns="False" Margin="10,53,10,10" IsSynchronizedWithCurrentItem="True"/>
+        
+        <!-- Search Bar -->
+        <DockPanel Grid.Row="1" Background="#f5f5f5" Height="40">
+            <TextBlock Text="Paieška:" VerticalAlignment="Center" Margin="10,0,5,0" FontSize="14"/>
+            <TextBox x:Name="SearchBar_TextBox" 
+                     Width="250" Height="30" Margin="0,5,10,5"
+                     TextChanged="TextBox_TextChanged"
+                     VerticalContentAlignment="Center"
+                     ToolTip="Įveskite vardą arba pavardę paieškai"
+                     Padding="8,5"
+                     BorderBrush="{StaticResource PrimaryColor}">
+            </TextBox>
+            <TextBlock Text="" Width="Auto"/> <!-- Changed from * to Auto -->
+        </DockPanel>
 
-        <!-- Input fields for adding a new student -->
-        <StackPanel x:Name="AddStudentPanel" Visibility="Hidden" Margin="0,0,0,10">
-            <Label Content="Vardas" RenderTransformOrigin="0.5,2.467" Margin="150,50,150,0"/>
-            <TextBox x:Name="FirstNameTextBox" Text="Vardas" Margin="150,0,150,10" UndoLimit="98"  />
-            <Label Content="Pavardė" RenderTransformOrigin="0.5,2.467" Margin="150,0,150,0" />
-            <TextBox x:Name="LastNameTextBox" Text="Last Name" Margin="150,0,150,10"/>
-            <Button Margin="150,0,150,10" Click="SubmitNewStudent_Click">
-                <Label Content="Label"/>
-            </Button>
-        </StackPanel>
+        <!-- Main Content Area -->
+        <Grid Grid.Row="2" Margin="10">
+            <!-- DataGrid for displaying student grades -->
+            <DataGrid x:Name="StudentGradesDataGrid" Visibility="Visible" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      HeadersVisibility="All"
+                      AlternatingRowBackground="#f0f0f0"
+                      BorderThickness="1"
+                      BorderBrush="{StaticResource PrimaryColor}"
+                      RowHeight="30"
+                      GridLinesVisibility="Horizontal"
+                      VerticalGridLinesBrush="#e0e0e0"
+                      HorizontalGridLinesBrush="#e0e0e0"
+                      RowHeaderWidth="0"
+                      FontSize="13"
+                      IsSynchronizedWithCurrentItem="True">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+            </DataGrid>
 
-        <StackPanel x:Name="AddModulePanel" Visibility="Hidden" Margin="0,0,0,10">
-            <Label Content="Modulio pavadinimas" Margin="150,50,150,0"/>
-            <TextBox x:Name="ModuleNameTextBox" Text="Module Name" Margin="150,0,150,10"/>
-            <Button Margin="150,0,150,10" Click="SubmitNewModule_Click">
-                <Label Content="Pridėti modulį"/>
-            </Button>
-        </StackPanel>
-        <StackPanel x:Name="DeleteStudentFromModulePanel" Visibility="Hidden" Margin="0,0,0,10">
-            <Label Content="Pasirinkite modulį" Margin="150,50,150,0"/>
-            <ComboBox x:Name="DeleteModuleComboBox" Margin="150,0,150,10" />
-            <Label Content="Pasirinkite studentą" Margin="150,0,150,0"/>
-            <ComboBox x:Name="DeleteStudentComboBox" Margin="150,0,150,10" />
-            <Button Margin="150,0,150,10" Click="SubmitDeleteStudentFromModule_Click">
-                <Label Content="Ištrinti studentą iš modulio"/>
-            </Button>
-        </StackPanel>
-		<!-- Add this alongside your other panels -->
-		<StackPanel x:Name="EditGradePanel" Visibility="Collapsed" Margin="10">
-			<TextBlock Text="Redaguoti pažymį" FontSize="16" Margin="0,0,0,10"/>
-			<ComboBox x:Name="EditModuleComboBox" Margin="0,5"
-					  DisplayMemberPath="ModuleName"
-					  SelectionChanged="EditModuleComboBox_SelectionChanged"/>
-			<ComboBox x:Name="EditStudentComboBox" Margin="0,5"
-					  DisplayMemberPath="Name"/>
-			<TextBox x:Name="NewGradeTextBox" Margin="0,5"
-					 ToolTip="Naujas pažymys"/>
-			<Button Content="Išsaugoti" Click="SubmitEditGrade_Click" Margin="0,5"/>
-		</StackPanel>
-		
-		
-		<TextBox x:Name="SearchBar_TextBox" HorizontalAlignment="Left" Margin="10,28,0,0" 
-         TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="186" Height="20" 
-         FontSize="13" VerticalContentAlignment="Center" TextChanged="TextBox_TextChanged">
-        </TextBox>
+            <!-- Add Student Panel -->
+            <Border x:Name="AddStudentPanel" Visibility="Hidden" 
+                    Background="White" BorderBrush="{StaticResource PrimaryColor}" 
+                    BorderThickness="1" CornerRadius="8" 
+                    Width="400" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Pridėti naują studentą" FontSize="18" FontWeight="Bold" 
+                               Foreground="{StaticResource TextColor}" Margin="0,0,0,20"
+                               HorizontalAlignment="Center"/>
+                    
+                    <Label Content="Vardas" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <TextBox x:Name="FirstNameTextBox" Padding="8,5" BorderThickness="1" 
+                             BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                             UndoLimit="98" ToolTip="Įveskite studento vardą"/>
+                    
+                    <Label Content="Pavardė" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <TextBox x:Name="LastNameTextBox" Padding="8,5" BorderThickness="1" 
+                             BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                             TextChanged="LastNameTextBox_TextChanged" ToolTip="Įveskite studento pavardę"/>
+                    
+                    <Button Content="Įtraukti studentą į sąrašą" Margin="0,20,0,0" Height="35"
+                            Background="{StaticResource PrimaryColor}" Foreground="White"
+                            BorderThickness="0" Padding="10,5" FontSize="14"
+                            Click="SubmitNewStudent_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="4" 
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
 
+            <!-- Add Module Panel -->
+            <Border x:Name="AddModulePanel" Visibility="Hidden" 
+                    Background="White" BorderBrush="{StaticResource PrimaryColor}" 
+                    BorderThickness="1" CornerRadius="8" 
+                    Width="400" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Pridėti naują modulį" FontSize="18" FontWeight="Bold" 
+                               Foreground="{StaticResource TextColor}" Margin="0,0,0,20"
+                               HorizontalAlignment="Center"/>
+                    
+                    <Label Content="Modulio pavadinimas" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <TextBox x:Name="ModuleNameTextBox" Padding="8,5" BorderThickness="1" 
+                             BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                             ToolTip="Įveskite modulio pavadinimą"/>
+                    
+                    <Button Content="Pridėti modulį" Margin="0,20,0,0" Height="35"
+                            Background="{StaticResource PrimaryColor}" Foreground="White"
+                            BorderThickness="0" Padding="10,5" FontSize="14"
+                            Click="SubmitNewModule_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="4" 
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Delete Student From Module Panel -->
+            <Border x:Name="DeleteStudentFromModulePanel" Visibility="Hidden" 
+                    Background="White" BorderBrush="{StaticResource PrimaryColor}" 
+                    BorderThickness="1" CornerRadius="8" 
+                    Width="400" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Ištrinti studentą iš modulio" FontSize="18" FontWeight="Bold" 
+                               Foreground="{StaticResource TextColor}" Margin="0,0,0,20"
+                               HorizontalAlignment="Center"/>
+                    
+                    <Label Content="Pasirinkite modulį" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="DeleteModuleComboBox" Padding="8,5" BorderThickness="1" 
+                              BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                              ToolTip="Pasirinkite modulį iš sąrašo"/>
+                    
+                    <Label Content="Pasirinkite studentą" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="DeleteStudentComboBox" Padding="8,5" BorderThickness="1" 
+                              BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                              ToolTip="Pasirinkite studentą iš sąrašo"/>
+                    
+                    <Button Content="Ištrinti studentą iš modulio" Margin="0,20,0,0" Height="35"
+                            Background="{StaticResource WarningColor}" Foreground="White"
+                            BorderThickness="0" Padding="10,5" FontSize="14"
+                            Click="SubmitDeleteStudentFromModule_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="4" 
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Delete Student Entirely Panel -->
+            <Border x:Name="DeleteStudentEntirelyPanel" Visibility="Hidden" 
+                    Background="White" BorderBrush="{StaticResource WarningColor}" 
+                    BorderThickness="1" CornerRadius="8" 
+                    Width="400" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Ištrinti studentą visiškai" FontSize="18" FontWeight="Bold" 
+                               Foreground="{StaticResource WarningColor}" Margin="0,0,0,20"
+                               HorizontalAlignment="Center"/>
+                    
+                    <TextBlock Text="Dėmesio! Šis veiksmas ištrina studentą ir visus jo pažymius iš sistemos!" 
+                               TextWrapping="Wrap" Foreground="{StaticResource WarningColor}" 
+                               FontWeight="SemiBold" Margin="0,0,0,15"/>
+                    
+                    <Label Content="Pasirinkite studentą ištrynimui" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="DeleteStudentEntirelyComboBox" Padding="8,5" BorderThickness="1" 
+                              BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                              ToolTip="Pasirinkite studentą, kurį norite ištrinti"/>
+                    
+                    <Button Content="Ištrinti studentą visiškai" Margin="0,20,0,0" Height="35"
+                            Background="{StaticResource WarningColor}" Foreground="White"
+                            BorderThickness="0" Padding="10,5" FontSize="14"
+                            Click="SubmitDeleteStudentEntirely_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="4" 
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Edit/Add Grade Panel -->
+            <Border x:Name="EditGradePanel" Visibility="Collapsed" 
+                    Background="White" BorderBrush="{StaticResource PrimaryColor}" 
+                    BorderThickness="1" CornerRadius="8" 
+                    Width="400" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock x:Name="GradeActionTextBlock" Text="Redaguoti pažymį" 
+                               FontSize="18" FontWeight="Bold" 
+                               Foreground="{StaticResource TextColor}" Margin="0,0,0,20"
+                               HorizontalAlignment="Center"/>
+                    
+                    <Label Content="Pasirinkite modulį" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="EditModuleComboBox" Padding="8,5" BorderThickness="1" 
+                              BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                              ToolTip="Pasirinkite modulį"
+                              SelectionChanged="EditModuleComboBox_SelectionChanged"/>
+                    
+                    <Label Content="Pasirinkite studentą" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="EditStudentComboBox" Padding="8,5" BorderThickness="1" 
+                              BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                              ToolTip="Pasirinkite studentą iš sąrašo"/>
+                    
+                    <Label Content="Pažymys (0-10)" FontSize="14" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <TextBox x:Name="NewGradeTextBox" Padding="8,5" BorderThickness="1" 
+                             BorderBrush="{StaticResource PrimaryColor}" FontSize="14"
+                             ToolTip="Įveskite pažymį nuo 0 iki 10"/>
+                    
+                    <Button x:Name="SubmitGradeButton" Content="Išsaugoti" Margin="0,20,0,0" Height="35"
+                            Background="{StaticResource PrimaryColor}" Foreground="White"
+                            BorderThickness="0" Padding="10,5" FontSize="14"
+                            Click="SubmitGradeButton_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="4" 
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

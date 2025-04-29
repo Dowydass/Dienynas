@@ -150,6 +150,38 @@ namespace Dienynas
         }
 
         /// <summary>
+        /// Deletes a student entirely from the database, including all associated grades.
+        /// </summary>
+        /// <param name="studentId">The ID of the student to delete</param>
+        /// <returns>True if deletion was successful, false otherwise</returns>
+        public bool DeleteStudent(int studentId)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    
+                    // The foreign key constraints with CASCADE will automatically delete associated grades
+                    string query = "DELETE FROM Students WHERE Id = @studentId";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@studentId", studentId);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting student: " + ex.Message);
+                MainWindow.ShowMessage("Error deleting student: " + ex.Message, "Database Error");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Updates a student's information in the database.
         /// </summary>
         /// <param name="id">The ID of the student to update</param>
