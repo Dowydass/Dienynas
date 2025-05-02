@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+    using System.Windows.Controls;
 
 namespace Dienynas
 {
@@ -166,6 +167,54 @@ namespace Dienynas
         }
 
         /// <summary>
+        /// Sorts the rows of a matrix by a specific column value (such as by grade).
+        /// </summary>
+        /// <param name="rows">List of string arrays representing the matrix rows</param>
+        /// <param name="columnIndex">The column index to sort by</param>
+        /// <param name="ascending">If true, sort in ascending order; otherwise, sort in descending order</param>
+        /// <returns>Sorted list of rows</returns>
+        public static List<string[]> SortMatrixByColumn(List<string[]> rows, int columnIndex, bool ascending = true)
+        {
+            if (rows == null || rows.Count == 0)
+                return new List<string[]>();
+
+            // Create a temporary list for sorting
+            List<string[]> sortedRows = new List<string[]>(rows);
+            
+            // Sort based on the specified column
+            if (ascending)
+            {
+                // Try to parse as number first for numerical sorting
+                sortedRows.Sort((row1, row2) =>
+                {
+                    if (double.TryParse(row1[columnIndex], out double val1) && 
+                        double.TryParse(row2[columnIndex], out double val2))
+                    {
+                        return val1.CompareTo(val2);
+                    }
+                    // Fall back to string comparison if not numbers
+                    return string.Compare(row1[columnIndex], row2[columnIndex], StringComparison.Ordinal);
+                });
+            }
+            else
+            {
+                // Descending order
+                sortedRows.Sort((row1, row2) =>
+                {
+                    if (double.TryParse(row1[columnIndex], out double val1) && 
+                        double.TryParse(row2[columnIndex], out double val2))
+                    {
+                        return val2.CompareTo(val1);
+                    }
+                    // Fall back to string comparison if not numbers
+                    return string.Compare(row2[columnIndex], row1[columnIndex], StringComparison.Ordinal);
+                });
+            }
+            
+            return sortedRows;
+        }
+
+        /// <summary>
         /// Calculates statistics for a set of grades.
         /// </summary>
         /// <param name="grades">The list of grades</param>
@@ -201,6 +250,50 @@ namespace Dienynas
                 result["Median"] = sortedGrades[middleIndex];
                 
             return result;
+        }
+
+        /// <summary>
+        /// Updates a combo box with module names for sorting.
+        /// </summary>
+        /// <param name="comboBox">The combo box to update</param>
+        /// <param name="modules">List of modules</param>
+        /// <param name="keepItemCount">Number of initial items to keep (typically 2 for name and average)</param>
+        /// <returns>True if successful, false otherwise</returns>
+        public static bool UpdateComboBoxWithModules(ComboBox comboBox, List<Module> modules, int keepItemCount = 2)
+        {
+            if (comboBox == null || modules == null)
+                return false;
+
+            try
+            {
+                // Clear existing module columns but keep specified number of initial options
+                while (comboBox.Items.Count > keepItemCount)
+                {
+                    comboBox.Items.RemoveAt(keepItemCount);
+                }
+
+                // Add module columns
+                for (int i = 0; i < modules.Count; i++)
+                {
+                    comboBox.Items.Add(new ComboBoxItem 
+                    { 
+                        Content = modules[i].ModuleName, 
+                        Tag = i + 1 // +1 because the first column is the student name
+                    });
+                }
+
+                // Select the first item by default if not already selected
+                if (comboBox.SelectedIndex < 0 && comboBox.Items.Count > 0)
+                {
+                    comboBox.SelectedIndex = 0;
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,337 +7,330 @@ using System.Windows.Data;
 namespace Dienynas
 {
     /// <summary>
-    /// Class that handles input/output operations for the application.
+    /// Handles input/output operations for the application.
     /// </summary>
-    public class InOutUtils
+    public static class InOutUtils
     {
-        private static readonly DatabaseManager _dbManager = new DatabaseManager();
+        private static readonly DatabaseManager Database = new DatabaseManager();
+
+        #region Basic CRUD Operations
 
         /// <summary>
         /// Adds a new student to the database.
         /// </summary>
-        /// <param name="firstName">Student's first name</param>
-        /// <param name="lastName">Student's last name</param>
         public static void AddStudent(string firstName, string lastName)
         {
             try
             {
                 Student student = new Student(firstName, lastName);
-                _dbManager.AddStudent(student.Name, student.Lastname);
-                Console.WriteLine($"Student added: {firstName} {lastName}");
+                Database.AddStudent(student.Name, student.Lastname);
             }
             catch (ArgumentException)
             {
-                // The validation error is already shown via popup in Student.ValidateWithPopup
-                // We're just catching it here to prevent the application from crashing
+                // Validation error already shown via popup in Student.ValidateWithPopup
             }
         }
 
         /// <summary>
-        /// Retrieves all students from the database.
+        /// Gets all students from the database.
         /// </summary>
-        /// <returns>A list of all students</returns>
         public static List<Student> GetStudents()
         {
-            List<Student> students = _dbManager.GetStudents();
-
-            Console.WriteLine("Students:");
-            foreach (var student in students)
-            {
-                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Surname: {student.Lastname}");
-            }
-            return students;
+            return Database.GetStudents();
         }
 
         /// <summary>
-        /// Retrieves all modules from the database.
+        /// Gets all modules from the database.
         /// </summary>
-        /// <returns>A list of all modules</returns>
         public static List<Module> GetModules()
         {
-            List<Module> modules = _dbManager.GetModules();
-
-            Console.WriteLine("Modules:");
-            foreach (var module in modules)
-            {
-                Console.WriteLine($"ID: {module.Id}, Name: {module.ModuleName}");
-            }
-            return modules;
+            return Database.GetModules();
         }
 
         /// <summary>
         /// Adds a new module to the database.
         /// </summary>
-        /// <param name="moduleName">Name of the module to add</param>
         public static void AddModule(string moduleName)
         {
             try
             {
-                // Validate module name
                 if (Module.IsValidModuleName(moduleName))
                 {
-                    _dbManager.AddModule(moduleName);
-                    Console.WriteLine($"Module '{moduleName}' successfully added.");
+                    Database.AddModule(moduleName);
                 }
             }
             catch (ArgumentException)
             {
-                // The validation error is already shown via popup in Module.ValidateWithPopup
-                // We're just catching it here to prevent the application from crashing
+                // Validation error already shown via popup in Module.ValidateWithPopup
             }
         }
 
         /// <summary>
-        /// Retrieves all grades from the database.
+        /// Gets all grades from the database.
         /// </summary>
-        /// <returns>A list of all grades</returns>
         public static List<Grade> GetGrades()
         {
-            List<Grade> grades = _dbManager.GetGrades();
-
-            Console.WriteLine("Grades:");
-            foreach (var grade in grades)
-            {
-                Console.WriteLine($"ID: {grade.Id}, Student ID: {grade.StudentId}, Module ID: {grade.ModuleId}, Grade: {grade.StudentGrade}");
-            }
-            return grades;
+            return Database.GetGrades();
         }
 
         /// <summary>
-        /// Deletes a student's grade for a specific module.
+        /// Removes a student from a specific module.
         /// </summary>
-        /// <param name="studentId">The ID of the student</param>
-        /// <param name="moduleId">The ID of the module</param>
         public static void DeleteStudentFromModule(int studentId, int moduleId)
         {
-            _dbManager.DeleteStudentFromModule(studentId, moduleId);
-            Console.WriteLine($"Student ID: {studentId} successfully removed from module ID: {moduleId}.");
+            Database.DeleteStudentFromModule(studentId, moduleId);
         }
 
         /// <summary>
         /// Updates student information.
         /// </summary>
-        /// <param name="studentId">The ID of the student to update</param>
-        /// <param name="newFirstName">The new first name</param>
-        /// <param name="newLastName">The new last name</param>
         public static void EditStudent(int studentId, string newFirstName, string newLastName)
         {
-            _dbManager.UpdateStudent(studentId, newFirstName, newLastName);
+            Database.UpdateStudent(studentId, newFirstName, newLastName);
         }
 
         /// <summary>
-        /// Adds a grade for a student in any module.
+        /// Adds a grade for a student in a module.
         /// </summary>
-        /// <param name="studentId">The student's ID</param>
-        /// <param name="moduleId">The module's ID</param>
-        /// <param name="grade">The grade value</param>
-        /// <remarks>
-        /// This method allows adding grades for any valid student and module combination,
-        /// automatically creating the student-module relationship if it doesn't already exist.
-        /// </remarks>
         public static void AddGrade(int studentId, int moduleId, int grade)
         {
-            _dbManager.AddGrade(studentId, moduleId, grade);
+            Database.AddGrade(studentId, moduleId, grade);
         }
 
         /// <summary>
-        /// Loads the student grades matrix into a DataGrid.
+        /// Deletes a student and all their grades.
         /// </summary>
-        /// <param name="studentGradesDataGrid">The DataGrid to load the data into</param>
-        public static void LoadStudentGradesMatrix(DataGrid studentGradesDataGrid)
+        public static bool DeleteStudent(int studentId)
         {
-            string[,] matrix = _dbManager.GetStudentGradesMatrix();
+            return Database.DeleteStudent(studentId);
+        }
+
+        #endregion
+
+        #region DataGrid Operations
+
+        /// <summary>
+        /// Loads student grades data into the DataGrid.
+        /// </summary>
+        public static void LoadStudentGradesMatrix(DataGrid gradesGrid)
+        {
+            string[,] matrix = Database.GetStudentGradesMatrix();
             List<string[]> rows = TaskUtils.ConvertMatrixToRows(matrix);
-
-            // Bind rows to DataGrid
-            studentGradesDataGrid.ItemsSource = rows;
+            gradesGrid.ItemsSource = rows;
         }
 
         /// <summary>
-        /// Configures the DataGrid columns for student grades and loads the data.
+        /// Configures columns for the student grades DataGrid.
         /// </summary>
-        /// <param name="studentGradesDataGrid">The DataGrid to configure</param>
-        public static void ConfigureStudentGradesDataGrid(DataGrid studentGradesDataGrid)
+        public static void ConfigureStudentGradesDataGrid(DataGrid gradesGrid)
         {
-            List<Module> modules = _dbManager.GetModules();
-            string[,] matrix = _dbManager.GetStudentGradesMatrix();
-
-            // Clear existing columns  
-            studentGradesDataGrid.Columns.Clear();
-
-            // Add a column for the student name  
-            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            List<Module> modules = Database.GetModules();
+            
+            // Clear and create columns
+            gradesGrid.Columns.Clear();
+            
+            // Student name column
+            gradesGrid.Columns.Add(new DataGridTextColumn
             {
-                Header = "Student",
-                Binding = new Binding($"[{0}]") // First column: Student name  
+                Header = "Studentas",
+                Binding = new Binding("[0]")
             });
 
-            // Add columns for each module  
+            // Module columns
             for (int i = 0; i < modules.Count; i++)
             {
-                studentGradesDataGrid.Columns.Add(new DataGridTextColumn
+                gradesGrid.Columns.Add(new DataGridTextColumn
                 {
                     Header = modules[i].ModuleName,
-                    Binding = new Binding($"[{i + 1}]") // Module grades  
+                    Binding = new Binding($"[{i + 1}]")
                 });
             }
 
-            // Add a column for the average grade  
-            studentGradesDataGrid.Columns.Add(new DataGridTextColumn
+            // Average column
+            gradesGrid.Columns.Add(new DataGridTextColumn
             {
-                Header = "Average",
-                Binding = new Binding($"[{modules.Count + 1}]") // Last column: Average grade  
+                Header = "Vidurkis",
+                Binding = new Binding($"[{modules.Count + 1}]")
             });
 
-            // Prepare and bind rows to DataGrid
-            List<string[]> rows = TaskUtils.ConvertMatrixToRows(matrix);
-            studentGradesDataGrid.ItemsSource = rows;
+            // Load data
+            LoadStudentGradesMatrix(gradesGrid);
         }
 
+        #endregion
+
+        #region Search and Sort Operations
+
         /// <summary>
-        /// Searches for students in the database.
+        /// Searches for students by name.
         /// </summary>
-        /// <param name="query">The search query</param>
-        /// <returns>A list of students matching the search criteria</returns>
         public static List<Student> SearchStudents(string query)
         {
-            return _dbManager.SearchStudentsInDatabase(query);
+            return Database.SearchStudentsInDatabase(query);
         }
 
         /// <summary>
-        /// Searches for students in the matrix and returns the filtered rows.
+        /// Searches for students in the data matrix.
         /// </summary>
-        /// <param name="query">The name or partial name to search for</param>
-        /// <returns>A list of filtered rows from the matrix</returns>
         public static List<string[]> SearchStudentsInMatrix(string query)
         {
-            string[,] filteredMatrix = _dbManager.SearchStudentsInMatrix(query);
+            string[,] filteredMatrix = Database.SearchStudentsInMatrix(query);
             return TaskUtils.ConvertMatrixToRows(filteredMatrix);
         }
 
         /// <summary>
-        /// Handles the deletion of a student from a module.
+        /// Sorts the student grades by a specific column.
         /// </summary>
-        /// <param name="moduleSelectedValue">The selected module value</param>
-        /// <param name="studentSelectedValue">The selected student value</param>
-        /// <returns>True if deletion was successful, false otherwise</returns>
-        public static bool HandleStudentModuleDeletion(object moduleSelectedValue, object studentSelectedValue)
+        public static void SortStudentGradesMatrix(DataGrid gradesGrid, int columnIndex, bool ascending)
         {
-            if (moduleSelectedValue is int moduleId && studentSelectedValue is int studentId)
+            try
             {
-                DeleteStudentFromModule(studentId, moduleId);
-                MessageBox.Show("Student's grade has been deleted from the module!",
-                    "Delete Student Grade from Module",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                return true;
+                var rows = gradesGrid.ItemsSource as List<string[]>;
+                if (rows == null || rows.Count == 0)
+                    return;
+                
+                var sortedRows = TaskUtils.SortMatrixByColumn(rows, columnIndex, ascending);
+                gradesGrid.ItemsSource = sortedRows;
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Please select a module and a student.",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return false;
+                ShowErrorMessage("Klaida rūšiuojant duomenis", ex.Message);
             }
         }
 
         /// <summary>
-        /// Handles adding a new grade for a student in a module.
+        /// Sorts students by name.
         /// </summary>
-        /// <param name="moduleSelectedValue">The selected module value</param>
-        /// <param name="studentSelectedValue">The selected student value</param>
-        /// <param name="gradeText">The grade to add</param>
-        /// <returns>True if the grade was added successfully, false otherwise</returns>
-        public static bool HandleAddGrade(object moduleSelectedValue, object studentSelectedValue, string gradeText)
+        public static void SortStudentsByName(DataGrid gradesGrid, bool ascending)
         {
-            if (!(moduleSelectedValue is int moduleId) || !(studentSelectedValue is int studentId))
+            // Column 0 is the student name column
+            SortStudentGradesMatrix(gradesGrid, 0, ascending);
+        }
+
+        /// <summary>
+        /// Sorts students by average grade.
+        /// </summary>
+        public static void SortStudentsByAverage(DataGrid gradesGrid, bool ascending)
+        {
+            var rows = gradesGrid.ItemsSource as List<string[]>;
+            if (rows == null || rows.Count == 0)
+                return;
+            
+            // Last column is the average
+            int lastColumnIndex = rows[0].Length - 1;
+            SortStudentGradesMatrix(gradesGrid, lastColumnIndex, ascending);
+        }
+
+        /// <summary>
+        /// Sorts students by a specific module grade.
+        /// </summary>
+        public static void SortStudentsByModuleGrade(DataGrid gradesGrid, int moduleIndex, bool ascending)
+        {
+            // Module columns start at index 1
+            SortStudentGradesMatrix(gradesGrid, moduleIndex + 1, ascending);
+        }
+
+        #endregion
+
+        #region UI Interaction Helpers
+
+        /// <summary>
+        /// Handles student deletion from a module.
+        /// </summary>
+        public static bool HandleStudentModuleDeletion(object moduleId, object studentId)
+        {
+            // Validate parameters
+            if (!(moduleId is int validModuleId) || !(studentId is int validStudentId))
             {
-                MessageBox.Show("Please select a module and a student.",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                ShowErrorMessage("Klaida", "Prašome pasirinkti modulį ir studentą.");
                 return false;
             }
 
-            if (!int.TryParse(gradeText, out int grade) || grade < 0 || grade > 10)
-            {
-                MessageBox.Show("Grade must be a number between 0 and 10.",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return false;
-            }
-
-            AddGrade(studentId, moduleId, grade);
-            MessageBox.Show("Įvertinimas sėkmingai pridėtas!",
-                "Pridėti Pažymį",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            // Delete from module
+            DeleteStudentFromModule(validStudentId, validModuleId);
+            ShowSuccessMessage("Pažymys ištrintas", "Studento pažymys sėkmingai ištrintas iš modulio!");
             return true;
         }
 
         /// <summary>
-        /// Deletes a student entirely from the database, including all their grades.
+        /// Handles adding a new grade.
         /// </summary>
-        /// <param name="studentId">The ID of the student to delete</param>
-        /// <returns>True if deletion was successful, false otherwise</returns>
-        public static bool DeleteStudent(int studentId)
+        public static bool HandleAddGrade(object moduleId, object studentId, string gradeText)
         {
-            return _dbManager.DeleteStudent(studentId);
+            // Validate module and student
+            if (!(moduleId is int validModuleId) || !(studentId is int validStudentId))
+            {
+                ShowErrorMessage("Klaida", "Prašome pasirinkti modulį ir studentą.");
+                return false;
+            }
+
+            // Validate grade
+            if (!int.TryParse(gradeText, out int grade) || grade < 0 || grade > 10)
+            {
+                ShowErrorMessage("Klaida", "Pažymys turi būti skaičius nuo 0 iki 10.");
+                return false;
+            }
+
+            // Add grade
+            AddGrade(validStudentId, validModuleId, grade);
+            ShowSuccessMessage("Pridėti pažymį", "Įvertinimas sėkmingai pridėtas!");
+            return true;
         }
 
         /// <summary>
-        /// Handles the deletion of a student from the system.
+        /// Handles complete student deletion.
         /// </summary>
-        /// <param name="studentSelectedValue">The selected student value</param>
-        /// <returns>True if deletion was successful, false otherwise</returns>
-        public static bool HandleStudentDeletion(object studentSelectedValue)
+        public static bool HandleStudentDeletion(object studentId)
         {
-            if (studentSelectedValue is int studentId)
+            // Validate parameter
+            if (!(studentId is int validStudentId))
             {
-                // Confirm deletion with the user
-                MessageBoxResult result = MessageBox.Show(
-                    "Ar tikrai norite ištrinti šį studentą ir visus jo pažymius?",
-                    "Patvirtinti ištrynimą",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    bool success = DeleteStudent(studentId);
-                    if (success)
-                    {
-                        MessageBox.Show("Studentas ir visi jo pažymiai sėkmingai ištrinti!",
-
-
-                            "Ištrinti studentą",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
-                        return true;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Nepavyko ištrinti studento. Patikrinkite, ar studentas egzistuoja.",
-                            "Klaida",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        return false;
-                    }
-                }
+                ShowErrorMessage("Klaida", "Prašome pasirinkti studentą.");
                 return false;
             }
+
+            // Confirm deletion
+            MessageBoxResult confirmation = MessageBox.Show(
+                "Ar tikrai norite ištrinti šį studentą ir visus jo pažymius?",
+                "Patvirtinti ištrynimą",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirmation != MessageBoxResult.Yes)
+                return false;
+
+            // Delete student
+            bool success = DeleteStudent(validStudentId);
+            
+            if (success)
+                ShowSuccessMessage("Ištrinti studentą", "Studentas ir visi jo pažymiai sėkmingai ištrinti!");
             else
-            {
-                MessageBox.Show("Prašome pasirinkti studentą.",
-                    "Klaida",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return false;
-            }
+                ShowErrorMessage("Klaida", "Nepavyko ištrinti studento. Patikrinkite, ar studentas egzistuoja.");
+                
+            return success;
         }
+
+        #endregion
+
+        #region Message Helpers
+
+        /// <summary>
+        /// Shows an error message dialog.
+        /// </summary>
+        private static void ShowErrorMessage(string title, string message)
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        /// <summary>
+        /// Shows a success message dialog.
+        /// </summary>
+        private static void ShowSuccessMessage(string title, string message)
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        #endregion
     }
-
-
 }
 

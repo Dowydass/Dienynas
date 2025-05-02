@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Dienynas
 {
@@ -18,6 +19,11 @@ namespace Dienynas
         private readonly object _lockObject = new object();
         private Dictionary<string, UIElement> _panels;
         private ViewMode _currentViewMode = ViewMode.Default;
+        private bool _sortAscending = true;
+        private int _currentSortColumnIndex = 0;
+        private bool _quickSortAscending = true;
+        private int _quickSortColumnIndex = 0;
+        private bool _isSearchSortPanelVisible = true;
 
         public MainWindow()
         {
@@ -31,6 +37,15 @@ namespace Dienynas
             // Inicializuoti duomenų bazės jungtį ir gauti vartotojus
             _dbManager.ConnectAndFetchUsers();
             DataContext = this;
+
+            // Add keyboard shortcut for toggling search/sort panel
+            KeyDown += (s, e) =>
+            {
+                if (e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    ToggleSearchSortPanel_Click(this, new RoutedEventArgs());
+                }
+            };
 
             // Initialize the window and load data
             // Inicializuoti langą ir užkrauti duomenis
@@ -51,7 +66,8 @@ namespace Dienynas
                 { "DeleteStudentFromModulePanel", DeleteStudentFromModulePanel },
                 { "DeleteStudentEntirelyPanel", DeleteStudentEntirelyPanel },
                 { "EditGradePanel", EditGradePanel },
-                { "SearchBar_TextBox", SearchBar_TextBox }
+                { "SearchSortPanel", SearchSortPanel },
+                { "SortingPanel", SortingPanel }
             };
         }
 
@@ -90,13 +106,77 @@ namespace Dienynas
                 InOutUtils.ConfigureStudentGradesDataGrid(StudentGradesDataGrid);
                 InOutUtils.LoadStudentGradesMatrix(StudentGradesDataGrid);
 
+                // Update sort columns for both sorting panels
+                UpdateSortColumnComboBox();
+                UpdateQuickSortComboBox();
+
                 // Return to default view
                 // Grįžti į numatytąjį rodinį
                 VisibilityManager.Show(StudentGradesDataGrid);
+
+                // Keep the search and sort panel visibility state
+                SearchSortPanel.Visibility = _isSearchSortPanelVisible ? Visibility.Visible : Visibility.Collapsed;
+                ToggleButtonIcon.Text = _isSearchSortPanelVisible ? "⮝" : "⮟";
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading data: {ex.Message}", "Data Error");
+            }
+        }
+
+        /// <summary>
+        /// Updates the sort column combo box with module names
+        /// </summary>
+        private void UpdateSortColumnComboBox()
+        {
+            try
+            {
+                var modules = InOutUtils.GetModules();
+                if (!TaskUtils.UpdateComboBoxWithModules(SortColumnComboBox, modules))
+                {
+                    MessageBox.Show("Nepavyko atnaujinti rūšiavimo stulpelių.", "Rūšiavimo klaida", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Klaida atnaujinant rūšiavimo stulpelius: {ex.Message}", "Rūšiavimo klaida");
+            }
+        }
+
+        /// <summary>
+        /// Updates the quick sort combo box with available modules
+        /// </summary>
+        private void UpdateQuickSortComboBox()
+        {
+            try
+            {
+                // Keep the first two items (name and average)
+                while (QuickSortComboBox.Items.Count > 2)
+                {
+                    QuickSortComboBox.Items.RemoveAt(2);
+                }
+
+                // Add module columns
+                var modules = InOutUtils.GetModules();
+                for (int i = 0; i < modules.Count; i++)
+                {
+                    QuickSortComboBox.Items.Add(new ComboBoxItem 
+                    { 
+                        Content = modules[i].ModuleName, 
+                        Tag = i + 1 // +1 because the first column is the student name
+                    });
+                }
+
+                // Select the first item by default if not already selected
+                if (QuickSortComboBox.SelectedIndex < 0 && QuickSortComboBox.Items.Count > 0)
+                {
+                    QuickSortComboBox.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error updating quick sort combo box: {ex.Message}");
             }
         }
 
@@ -262,7 +342,7 @@ namespace Dienynas
         {
             // First switch to the view to ensure panel is visible
             SwitchView(ViewMode.DeleteStudentFromModule);
-
+           
             try
             {
                 // Populate the Module ComboBox
@@ -548,8 +628,9 @@ namespace Dienynas
                 // Populate the Student ComboBox with all students
                 // Užpildyti studentų išskleidžiamąjį sąrašą visais studentais
                 var students = InOutUtils.GetStudents();
+
                 EditStudentComboBox.ItemsSource = students;
-                EditStudentComboBox.DisplayMemberPath = "Name";
+                EditStudentComboBox.DisplayMemberPath = "FullName";
                 EditStudentComboBox.SelectedValuePath = "Id";
             
                 // Clear the grade text box
@@ -600,14 +681,120 @@ namespace Dienynas
         }
 
         /// <summary>
-        /// Reserved for student sorting functionality
-        /// Rezervuota studentų rūšiavimo funkcionalumui
+        /// Handles the sort student button click
         /// </summary>
         private void SortStudent_Click(object sender, RoutedEventArgs e)
         {
-            // Not currently implemented - could be expanded in the future
-            // Šiuo metu neįgyvendinta - galėtų būti išplėsta ateityje
-            MessageBox.Show("Rūšiavimo funkcionalumas dar neįgyvendintas", "Informacija");
+            try
+            {
+                // Show the sorting panel and ensure the DataGrid is visible
+                Window_Loaded();
+                SwitchView(ViewMode.Default);
+                VisibilityManager.Show(SortingPanel);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Klaida inicializuojant rūšiavimą: {ex.Message}", "Rūšiavimo klaida");
+            }
+        }
+
+        /// <summary>
+        /// Handles the selection change of the sort column combo box
+        /// </summary>
+        private void SortColumnComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SortColumnComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            {
+                _currentSortColumnIndex = Convert.ToInt32(selectedItem.Tag);
+            }
+        }
+
+        /// <summary>
+        /// Handles the radio button selection change for sort direction
+        /// </summary>
+        private void SortDirection_Changed(object sender, RoutedEventArgs e)
+        {
+            _sortAscending = SortAscendingRadio.IsChecked == true;
+        }
+
+        /// <summary>
+        /// Handles the sort button click
+        /// </summary>
+        private void SortButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_currentSortColumnIndex == -1) // Special value for average
+                {
+                    // Sort by average grade
+                    InOutUtils.SortStudentsByAverage(StudentGradesDataGrid, _sortAscending);
+                }
+                else if (_currentSortColumnIndex == 0)
+                {
+                    // Sort by student name
+                    InOutUtils.SortStudentsByName(StudentGradesDataGrid, _sortAscending);
+                }
+                else
+                {
+                    // Sort by specific module grade
+                    InOutUtils.SortStudentsByModuleGrade(StudentGradesDataGrid, _currentSortColumnIndex - 1, _sortAscending);
+                }
+                
+                MessageBox.Show("Duomenys sėkmingai surūšiuoti!", "Rūšiavimas", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Klaida rūšiuojant duomenis: {ex.Message}", "Rūšiavimo klaida");
+            }
+        }
+
+        /// <summary>
+        /// Handles the selection change of the quick sort combo box
+        /// </summary>
+        private void QuickSortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (QuickSortComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            {
+                _quickSortColumnIndex = Convert.ToInt32(selectedItem.Tag);
+            }
+        }
+
+        /// <summary>
+        /// Handles the radio button selection change for quick sort direction
+        /// </summary>
+        private void QuickSortDirection_Changed(object sender, RoutedEventArgs e)
+        {
+            _quickSortAscending = QuickSortAscending.IsChecked == true;
+        }
+
+        /// <summary>
+        /// Handles the quick sort button click
+        /// </summary>
+        private void QuickSortButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_quickSortColumnIndex == -1) // Special value for average
+                {
+                    // Sort by average grade
+                    InOutUtils.SortStudentsByAverage(StudentGradesDataGrid, _quickSortAscending);
+                }
+                else if (_quickSortColumnIndex == 0)
+                {
+                    // Sort by student name
+                    InOutUtils.SortStudentsByName(StudentGradesDataGrid, _quickSortAscending);
+                }
+                else
+                {
+                    // Sort by specific module grade
+                    InOutUtils.SortStudentsByModuleGrade(StudentGradesDataGrid, _quickSortColumnIndex - 1, _quickSortAscending);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Klaida rūšiuojant duomenis: {ex.Message}", "Rūšiavimo klaida");
+            }
         }
 
         /// <summary>
@@ -674,6 +861,25 @@ namespace Dienynas
         }
         
         /// <summary>
+        /// Handles the toggle button click for showing/hiding the search and sort panel
+        /// </summary>
+        private void ToggleSearchSortPanel_Click(object sender, RoutedEventArgs e)
+        {
+            _isSearchSortPanelVisible = !_isSearchSortPanelVisible;
+            
+            // Update panel visibility
+            SearchSortPanel.Visibility = _isSearchSortPanelVisible ? Visibility.Visible : Visibility.Collapsed;
+            
+            // Update toggle button icon
+            ToggleButtonIcon.Text = _isSearchSortPanelVisible ? "⮝" : "⮟";
+            
+            // Update tooltip
+            ToggleSearchSortButton.ToolTip = _isSearchSortPanelVisible 
+                ? "Slėpti paieškos ir rūšiavimo skydelį" 
+                : "Rodyti paieškos ir rūšiavimo skydelį";
+        }
+
+        /// <summary>
         /// Generic button click handler
         /// Bendras mygtuko paspaudimo apdorojimas
         /// </summary>
@@ -702,7 +908,13 @@ namespace Dienynas
             try
             {
                 Window_Loaded();
-                SwitchView(ViewMode.Search);
+                SwitchView(ViewMode.Default);
+                
+                // Show search sort panel and focus on search box
+                SearchSortPanel.Visibility = Visibility.Visible;
+                _isSearchSortPanelVisible = true;
+                ToggleButtonIcon.Text = "⮝";
+                SearchBar_TextBox.Focus();
             }
             catch (Exception ex)
             {

@@ -101,6 +101,9 @@ namespace Dienynas
             // Hide all panels first with their original visibility type
             foreach (var panel in panels)
             {
+                if (panel.Key == "SearchSortPanel")
+                    continue; // Don't hide the search sort panel - let it be managed separately
+                
                 if (originalStates[panel.Key] == Visibility.Collapsed)
                 {
                     Collapse(panel.Value);
@@ -116,6 +119,7 @@ namespace Dienynas
             {
                 case ViewMode.Default:
                     Show(panels["StudentGradesDataGrid"]);
+                    // Don't show SortingPanel anymore as we're using the unified SearchSortPanel
                     break;
 
                 case ViewMode.AddStudent:
@@ -139,10 +143,12 @@ namespace Dienynas
                     break;
 
                 case ViewMode.Search:
-                    Show(panels["SearchBar_TextBox"]);
                     Show(panels["StudentGradesDataGrid"]);
+                    // Make sure the search sort panel is visible when in search mode
+                    if (panels.ContainsKey("SearchSortPanel"))
+                        Show(panels["SearchSortPanel"]);
                     break;
-
+                        
                 case ViewMode.DeleteStudent:
                     Show(panels["DeleteStudentEntirelyPanel"]);
                     break;

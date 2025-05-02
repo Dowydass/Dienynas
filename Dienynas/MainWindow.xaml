@@ -86,22 +86,60 @@
             </MenuItem>
         </Menu>
         
-        <!-- Search Bar -->
-        <DockPanel Grid.Row="1" Background="#f5f5f5" Height="40">
-            <TextBlock Text="Paieška:" VerticalAlignment="Center" Margin="10,0,5,0" FontSize="14"/>
-            <TextBox x:Name="SearchBar_TextBox" 
-                     Width="250" Height="30" Margin="0,5,10,5"
-                     TextChanged="TextBox_TextChanged"
-                     VerticalContentAlignment="Center"
-                     ToolTip="Įveskite vardą arba pavardę paieškai"
-                     Padding="8,5"
-                     BorderBrush="{StaticResource PrimaryColor}">
-            </TextBox>
-            <TextBlock Text="" Width="Auto"/> <!-- Changed from * to Auto -->
-        </DockPanel>
+        <!-- Search and Sort Panel -->
+        <Grid Grid.Row="1">
+            <DockPanel x:Name="SearchSortPanel" Background="#f5f5f5" Height="40">
+                <Button x:Name="ToggleSearchSortButton" DockPanel.Dock="Right" Width="30" Height="30" Margin="5,0,10,0"
+                        Click="ToggleSearchSortPanel_Click" ToolTip="Rodyti/slėpti paieškos ir rūšiavimo skydelį" 
+                        Background="Transparent" BorderThickness="0">
+                    <TextBlock Text="⮝" x:Name="ToggleButtonIcon" FontSize="14"/>
+                </Button>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Paieška:" VerticalAlignment="Center" Margin="10,0,5,0" FontSize="14" x:Name="SearchLabel_Label"/>
+                    <TextBox x:Name="SearchBar_TextBox" 
+                            Width="250" Height="30" Margin="0,5,10,5"
+                            TextChanged="TextBox_TextChanged"
+                            VerticalContentAlignment="Center"
+                            ToolTip="Įveskite vardą arba pavardę paieškai"
+                            Padding="8,5"
+                            BorderBrush="{StaticResource PrimaryColor}">
+                    </TextBox>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Rūšiuoti:" VerticalAlignment="Center" Margin="10,0,5,0" FontSize="14"/>
+                    <ComboBox x:Name="QuickSortComboBox" Width="120" Height="30" Margin="0,0,5,0" SelectionChanged="QuickSortComboBox_SelectionChanged">
+                        <ComboBoxItem Content="Pagal vardą" Tag="0"/>
+                        <ComboBoxItem Content="Pagal vidurkį" Tag="-1"/>
+                    </ComboBox>
+                    <RadioButton x:Name="QuickSortAscending" Content="↑" IsChecked="True" Margin="0,0,5,0"
+                                 GroupName="QuickSortDirection" Checked="QuickSortDirection_Changed"/>
+                    <RadioButton x:Name="QuickSortDescending" Content="↓" Margin="0,0,5,0"
+                                 GroupName="QuickSortDirection" Checked="QuickSortDirection_Changed"/>
+                    <Button Content="Rūšiuoti" Width="80" Height="30" Click="QuickSortButton_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Grid>
 
         <!-- Main Content Area -->
         <Grid Grid.Row="2" Margin="10">
+            <!-- Sorting Panel -->
+            <StackPanel x:Name="SortingPanel" Orientation="Horizontal" Margin="10,5" HorizontalAlignment="Right" Visibility="Visible">
+                <TextBlock Text="Rūšiuoti pagal:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox x:Name="SortColumnComboBox" Width="150" Margin="0,0,5,0" SelectionChanged="SortColumnComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Vardą" Tag="0"/>
+                    <ComboBoxItem Content="Vidurkį" Tag="-1"/>
+                </ComboBox>
+                <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
+                    <RadioButton x:Name="SortAscendingRadio" Content="↑" IsChecked="True" Margin="0,0,5,0"
+                                GroupName="SortDirection" Checked="SortDirection_Changed"/>
+                    <RadioButton x:Name="SortDescendingRadio" Content="↓" Margin="0,0,5,0"
+                                GroupName="SortDirection" Checked="SortDirection_Changed"/>
+                </StackPanel>
+                <Button Content="Rūšiuoti" Width="80" Click="SortButton_Click"/>
+            </StackPanel>
+
             <!-- DataGrid for displaying student grades -->
             <DataGrid x:Name="StudentGradesDataGrid" Visibility="Visible" 
                       AutoGenerateColumns="False" 

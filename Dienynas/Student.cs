@@ -20,8 +20,7 @@ namespace Dienynas
             get => _name;
             set
             {
-                if (!IsValidName(value))
-                    throw new ArgumentException("Vardas yra neteisingas. Vardas gali turėti tik raides, tarpus ir specialius simbolius (pvz., ė, ų, č).");
+                    ValidateName(value, "Vardas");
                 _name = value;
             }
         }
@@ -31,8 +30,7 @@ namespace Dienynas
             get => _lastname;
             set
             {
-                if (!IsValidName(value))
-                    throw new ArgumentException("Pavardė yra neteisinga. Pavardė gali turėti tik raides, tarpus ir specialius simbolius (pvz., ė, ų, č).");
+                ValidateName(value, "Pavardė");
                 _lastname = value;
             }
         }
@@ -57,7 +55,12 @@ namespace Dienynas
             Name = name; // Will validate through property setter
             Lastname = lastname; // Will validate through property setter
         }
+
         
+        
+        public string FullName => $"{Name} {Lastname}";
+
+
         /// <summary>
         /// Patikrina, ar vardas/pavardė yra teisingi
         /// </summary>
@@ -198,6 +201,20 @@ namespace Dienynas
         public string GetFullName()
         {
             return $"{Name} {Lastname}";
+        }
+
+        private void ValidateName(string value, string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException($"{fieldName} negali būti tuščias.");
+                
+            if (value.Length < 2 || value.Length > 50)
+                throw new ArgumentException($"{fieldName} turi būti nuo 2 iki 50 simbolių ilgio.");
+                
+            if (!Regex.IsMatch(value, @"^[\p{L}\s'\-]+$"))
+                throw new ArgumentException($"{fieldName} gali turėti tik raides, tarpus, apostrofus ir brūkšnelius.");
+            
+            // Add other validations from IsValidName with specific error messages
         }
     }
 }
