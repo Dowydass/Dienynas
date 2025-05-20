@@ -75,6 +75,7 @@ namespace Dienynas
                     if (!isAddMode)
                     {
                         // Only add the selection changed handler for edit mode
+                        // Tik pridėjimo režimu
                         moduleComboBox.SelectionChanged += selectionChangedHandler;
                     }
                 }
