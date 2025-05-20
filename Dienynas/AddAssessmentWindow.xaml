@@ -1,0 +1,24 @@
+﻿<Window x:Class="Dienynas.AddAssessmentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pridėti / Redaguoti pažymį"
+        Background="{StaticResource BackgroundColor}">
+    <Grid Margin="20">
+        <StackPanel>
+            <Label Content="Studentas" Style="{StaticResource FieldLabel}"/>
+            <ComboBox x:Name="StudentComboBox" Style="{StaticResource ModernComboBox}" />
+
+            <Label Content="Modulis" Style="{StaticResource FieldLabel}"/>
+            <ComboBox x:Name="ModuleComboBox" Style="{StaticResource ModernComboBox}" />
+
+            <Label Content="Pažymys" Style="{StaticResource FieldLabel}"/>
+            <TextBox x:Name="GradeTextBox" Style="{StaticResource ModernTextBox}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Pridėti pažymį" Style="{StaticResource ActionButton}" Click="AddGrade_Click"/>
+                <Button Content="Redaguoti pažymį" Style="{StaticResource ActionButton}" Margin="10,0,0,0" Click="EditGrade_Click"/>
+                <Button Content="Atšaukti" Style="{StaticResource ActionButton}" Margin="10,0,0,0" Click="Cancel_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

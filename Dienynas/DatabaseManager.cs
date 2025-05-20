@@ -405,6 +405,61 @@ namespace Dienynas
         }
 
         /// <summary>
+        /// Adds a grade for a student in a specific module.
+        /// If a grade already exists, it updates it instead of inserting a duplicate.
+        /// </summary>
+        /// <param name="studentId">The ID of the student</param>
+        /// <param name="moduleId">The ID of the module</param>
+        /// <param name="grade">The grade value</param>
+        public void AddOrUpdateGrade(int studentId, int moduleId, int grade)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    // Check if grade exists
+                    string checkQuery = "SELECT COUNT(*) FROM Grades WHERE StudentId = @studentId AND ModuleId = @moduleId";
+                    using (var checkCommand = new MySqlCommand(checkQuery, connection))
+                    {
+                        checkCommand.Parameters.AddWithValue("@studentId", studentId);
+                        checkCommand.Parameters.AddWithValue("@moduleId", moduleId);
+                        int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+                        if (count > 0)
+                        {
+                            // Update existing grade
+                            string updateQuery = "UPDATE Grades SET Pazymys = @grade WHERE StudentId = @studentId AND ModuleId = @moduleId";
+                            using (var updateCommand = new MySqlCommand(updateQuery, connection))
+                            {
+                                updateCommand.Parameters.AddWithValue("@grade", grade);
+                                updateCommand.Parameters.AddWithValue("@studentId", studentId);
+                                updateCommand.Parameters.AddWithValue("@moduleId", moduleId);
+                                updateCommand.ExecuteNonQuery();
+                            }
+                        }
+                        else
+                        {
+                            // Insert new grade
+                            string insertQuery = "INSERT INTO Grades (StudentId, ModuleId, Pazymys) VALUES (@studentId, @moduleId, @grade)";
+                            using (var insertCommand = new MySqlCommand(insertQuery, connection))
+                            {
+                                insertCommand.Parameters.AddWithValue("@studentId", studentId);
+                                insertCommand.Parameters.AddWithValue("@moduleId", moduleId);
+                                insertCommand.Parameters.AddWithValue("@grade", grade);
+                                insertCommand.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error adding or updating grade: " + ex.Message);
+                MainWindow.ShowMessage("Error adding or updating grade: " + ex.Message, "Database Error");
+            }
+        }
+
+        /// <summary>
         /// Searches for students in the database by name or surname.
         /// </summary>
         /// <param name="query">The search query</param>

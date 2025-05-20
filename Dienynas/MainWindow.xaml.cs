@@ -169,6 +169,7 @@ namespace Dienynas
                 }
 
                 // Select the first item by default if not already selected
+                // 
                 if (QuickSortComboBox.SelectedIndex < 0 && QuickSortComboBox.Items.Count > 0)
                 {
                     QuickSortComboBox.SelectedIndex = 0;
@@ -407,7 +408,7 @@ namespace Dienynas
                 else
                 {
                     DeleteStudentComboBox.ItemsSource = studentsWithGrades;
-                    DeleteStudentComboBox.DisplayMemberPath = "Name";
+                    DeleteStudentComboBox.DisplayMemberPath = "FullName";
                     DeleteStudentComboBox.SelectedValuePath = "Id";
                 }
             }
@@ -483,8 +484,8 @@ namespace Dienynas
 
                 // Update the UI text to indicate editing a grade
                 // Atnaujinti UI tekstą, nurodant, kad redaguojamas pažymys
-                GradeActionTextBlock.Text = "Edit Grade";
-                SubmitGradeButton.Content = "Update Grade";
+                GradeActionTextBlock.Text = "Keisti Pažymį";
+                SubmitGradeButton.Content = "Atnaujinti Pažymį";
             
                 // Populate the Module ComboBox
                 // Užpildyti modulių išskleidžiamąjį sąrašą
@@ -541,7 +542,7 @@ namespace Dienynas
                 else
                 {
                     EditStudentComboBox.ItemsSource = studentsWithGrades;
-                    EditStudentComboBox.DisplayMemberPath = "Name";
+                    EditStudentComboBox.DisplayMemberPath = "FullName";
                     EditStudentComboBox.SelectedValuePath = "Id";
                 }
             }
@@ -581,20 +582,7 @@ namespace Dienynas
 
                 // Update the grade in the database
                 // Atnaujinti pažymį duomenų bazėje
-                bool success = _dbManager.UpdateGrade(moduleId, studentId, newGrade);
-
-                if (success)
-                {
-                    MessageBox.Show("Pažymys sėkmingai atnaujintas!", "Sėkmė", 
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-                    Window_Loaded(); // Refresh the data grid / Atnaujinti duomenų tinklelį
-                    SwitchView(ViewMode.Default);
-                }
-                else
-                {
-                    MessageBox.Show("Nepavyko atnaujinti pažymio", "Klaida", 
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AddOrEditGrade(studentId, moduleId, newGrade);
             }
             catch (Exception ex)
             {
@@ -615,8 +603,8 @@ namespace Dienynas
             
                 // Update the UI text to indicate adding a grade
                 // Atnaujinti UI tekstą, nurodant, kad pridedamas pažymys
-                GradeActionTextBlock.Text = "Add Grade";
-                SubmitGradeButton.Content = "Add Grade";
+                GradeActionTextBlock.Text = "Pridėti Pažymį";
+                SubmitGradeButton.Content = "Pridėti Pažymį";
             
                 // Populate the Module ComboBox with all modules
                 // Užpildyti modulių išskleidžiamąjį sąrašą visais moduliais
@@ -655,19 +643,29 @@ namespace Dienynas
         {
             try
             {
-                if (GradeActionTextBlock.Text == "Add Grade")
+                if (GradeActionTextBlock.Text == "Pridėti Pažymį")
                 {
-                    bool success = InOutUtils.HandleAddGrade(
-                        EditModuleComboBox.SelectedValue,
-                        EditStudentComboBox.SelectedValue,
-                        NewGradeTextBox.Text
-                    );
-                
-                    if (success)
+                    if (EditModuleComboBox.SelectedValue == null || 
+                        EditStudentComboBox.SelectedValue == null || 
+                        string.IsNullOrWhiteSpace(NewGradeTextBox.Text))
                     {
-                        Window_Loaded();
-                        SwitchView(ViewMode.Default);
+                        MessageBox.Show("Prašome užpildyti visus laukus", "Klaida", 
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
                     }
+
+                    if (!int.TryParse(NewGradeTextBox.Text, out int newGrade) || 
+                        newGrade < 0 || newGrade > 10)
+                    {
+                        MessageBox.Show("Pažymys turi būti skaičius nuo 0 iki 10", "Klaida", 
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    var moduleId = (int)EditModuleComboBox.SelectedValue;
+                    var studentId = (int)EditStudentComboBox.SelectedValue;
+
+                    AddOrEditGrade(studentId, moduleId, newGrade);
                 }
                 else // Edit Grade
                 {
@@ -678,6 +676,33 @@ namespace Dienynas
             {
                 MessageBox.Show($"Error submitting grade: {ex.Message}", "Submit Error");
             }
+        }
+
+        /// <summary>
+        /// Adds or edits a grade in the database
+        /// Prideda arba redaguoja pažymį duomenų bazėje
+        /// </summary>
+        private void AddOrEditGrade(int studentId, int moduleId, int grade)
+        {
+            try
+            {
+                _dbManager.AddOrUpdateGrade(studentId, moduleId, grade);
+                RefreshGradesGrid(); // Make sure this method reloads the grid from DB
+                MainWindow.ShowMessage("Pažymys išsaugotas.", "Sėkmingai");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving grade: {ex.Message}", "Save Error");
+            }
+        }
+
+        /// <summary>
+        /// Refreshes the grades grid
+        /// Atnaujina pažymių tinklelį
+        /// </summary>
+        private void RefreshGradesGrid()
+        {
+            InOutUtils.LoadStudentGradesMatrix(StudentGradesDataGrid);
         }
 
         /// <summary>
@@ -862,6 +887,7 @@ namespace Dienynas
         
         /// <summary>
         /// Handles the toggle button click for showing/hiding the search and sort panel
+        
         /// </summary>
         private void ToggleSearchSortPanel_Click(object sender, RoutedEventArgs e)
         {
@@ -937,7 +963,7 @@ namespace Dienynas
                 // Užpildyti studentų išskleidžiamąjį sąrašą visais studentais
                 var students = InOutUtils.GetStudents();
                 DeleteStudentEntirelyComboBox.ItemsSource = students;
-                DeleteStudentEntirelyComboBox.DisplayMemberPath = "Name";
+                DeleteStudentEntirelyComboBox.DisplayMemberPath = "FullName";
                 DeleteStudentEntirelyComboBox.SelectedValuePath = "Id";
             }
             catch (Exception ex)

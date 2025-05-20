@@ -185,6 +185,7 @@ namespace Dienynas
             if (ascending)
             {
                 // Try to parse as number first for numerical sorting
+                // Pirmiausia bandome išanalizuoti kaip skaičių, kad galėtume rūšiuoti pagal skaičius
                 sortedRows.Sort((row1, row2) =>
                 {
                     if (double.TryParse(row1[columnIndex], out double val1) && 
@@ -214,15 +215,14 @@ namespace Dienynas
             return sortedRows;
         }
 
-        /// <summary>
-        /// Calculates statistics for a set of grades.
-        /// </summary>
-        /// <param name="grades">The list of grades</param>
-        /// <returns>A dictionary with various statistics</returns>
+        // Klase, kuri apdoroja studentų pažymių statistiką
+        // Dictionary<string, double> - raktas: statistikos tipas (vidurkis, minimumas, maksimumas, mediana), reikšmė: atitinkama reikšmė
         public static Dictionary<string, double> CalculateGradeStatistics(List<int> grades)
         {
             if (grades == null || grades.Count == 0)
             {
+                // Sukuriae tuščią statistiką, jei nėra pažymių
+                // Create empty statistics if no grades
                 return new Dictionary<string, double> {
                     { "Average", 0 },
                     { "Minimum", 0 },
@@ -232,33 +232,35 @@ namespace Dienynas
             }
 
             var result = new Dictionary<string, double>();
-            
+
             // Calculate average
+            // Skaiciuojame vidurkį
             result["Average"] = grades.Average();
-            
+
             // Calculate min/max
+            // Skaiciuojame minimumą ir maksimumą
             result["Minimum"] = grades.Min();
             result["Maximum"] = grades.Max();
-            
+
             // Calculate median
+            // Skaiciuojame medianą
             var sortedGrades = grades.OrderBy(g => g).ToList();
             int middleIndex = sortedGrades.Count / 2;
-            
+
+            // Jei lyginis skaičius pažymių, grąžiname vidurinius duomenis
             if (sortedGrades.Count % 2 == 0)
                 result["Median"] = (sortedGrades[middleIndex - 1] + sortedGrades[middleIndex]) / 2.0;
+
             else
                 result["Median"] = sortedGrades[middleIndex];
                 
             return result;
         }
-
-        /// <summary>
+        
+      
         /// Updates a combo box with module names for sorting.
-        /// </summary>
-        /// <param name="comboBox">The combo box to update</param>
-        /// <param name="modules">List of modules</param>
-        /// <param name="keepItemCount">Number of initial items to keep (typically 2 for name and average)</param>
-        /// <returns>True if successful, false otherwise</returns>
+        /// Atnaujina combo box su modulio pavadinimais rūšiavimui.
+     
         public static bool UpdateComboBoxWithModules(ComboBox comboBox, List<Module> modules, int keepItemCount = 2)
         {
             if (comboBox == null || modules == null)
@@ -267,6 +269,7 @@ namespace Dienynas
             try
             {
                 // Clear existing module columns but keep specified number of initial options
+                // Ivalome esamus modulio stulpelius, bet paliekame nurodytą pradinį pasirinkimų skaičių
                 while (comboBox.Items.Count > keepItemCount)
                 {
                     comboBox.Items.RemoveAt(keepItemCount);
@@ -278,11 +281,11 @@ namespace Dienynas
                     comboBox.Items.Add(new ComboBoxItem 
                     { 
                         Content = modules[i].ModuleName, 
-                        Tag = i + 1 // +1 because the first column is the student name
+                        Tag = i + 1 // +1 nes ID prasideda nuo 1
                     });
                 }
 
-                // Select the first item by default if not already selected
+                // Pasirinkti pirmąjį modulį, jei nieko nėra pasirinkta
                 if (comboBox.SelectedIndex < 0 && comboBox.Items.Count > 0)
                 {
                     comboBox.SelectedIndex = 0;

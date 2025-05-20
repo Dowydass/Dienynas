@@ -6,56 +6,123 @@
     <Application.Resources>
         <!-- Global application styles -->
         <ResourceDictionary>
-            <!-- Define a color palette -->
-            <SolidColorBrush x:Key="PrimaryColor" Color="#3498db"/>
-            <SolidColorBrush x:Key="SecondaryColor" Color="#2980b9"/>
-            <SolidColorBrush x:Key="AccentColor" Color="#2ecc71"/>
-            <SolidColorBrush x:Key="BackgroundColor" Color="#ecf0f1"/>
-            <SolidColorBrush x:Key="TextColor" Color="#34495e"/>
-            <SolidColorBrush x:Key="WarningColor" Color="#e74c3c"/>
+            <!-- Modern color palette -->
+            <SolidColorBrush x:Key="PrimaryColor" Color="#1976D2"/>
+            <SolidColorBrush x:Key="SecondaryColor" Color="#0D47A1"/>
+            <SolidColorBrush x:Key="AccentColor" Color="#43A047"/>
+            <SolidColorBrush x:Key="BackgroundColor" Color="#FAFBFC"/>
+            <SolidColorBrush x:Key="TextColor" Color="#212121"/>
+            <SolidColorBrush x:Key="WarningColor" Color="#E53935"/>
+            <SolidColorBrush x:Key="LightGrayColor" Color="#E0E0E0"/>
+            <SolidColorBrush x:Key="PanelBackgroundColor" Color="#FFFFFF"/>
+            
+            <!-- Effects -->
+            <DropShadowEffect x:Key="DropShadowEffect" BlurRadius="20" ShadowDepth="1" Opacity="0.15" Color="#000000"/>
+            <DropShadowEffect x:Key="SmallDropShadowEffect" BlurRadius="10" ShadowDepth="1" Opacity="0.12" Color="#000000"/>
+            
+            <!-- Animations -->
+            <Storyboard x:Key="FadeIn">
+                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
+            </Storyboard>
             
             <!-- Button Style -->
             <Style x:Key="ActionButton" TargetType="Button">
                 <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FontSize" Value="14"/>
-                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="20,10"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" 
-                                    CornerRadius="4" 
+                            <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                    CornerRadius="6" 
                                     Padding="{TemplateBinding Padding}">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.2" Color="#000000"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Background" Value="{StaticResource SecondaryColor}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="{StaticResource SecondaryColor}"/>
-                    </Trigger>
-                </Style.Triggers>
+            </Style>
+            
+            <!-- Warning Button Style -->
+            <Style x:Key="WarningButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource WarningColor}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Padding" Value="20,10"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                    CornerRadius="6" 
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.2" Color="#000000"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Background" Value="#C62828"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
             
             <!-- ComboBox Style -->
             <Style x:Key="ModernComboBox" TargetType="ComboBox">
-                <Setter Property="Padding" Value="8,5"/>
+                <Setter Property="Padding" Value="12,8"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource LightGrayColor}"/>
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Height" Value="40"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                    </Trigger>
+                    <Trigger Property="IsFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                    </Trigger>
+                </Style.Triggers>
             </Style>
             
             <!-- TextBox Style -->
             <Style x:Key="ModernTextBox" TargetType="TextBox">
-                <Setter Property="Padding" Value="8,5"/>
+                <Setter Property="Padding" Value="12,8"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource LightGrayColor}"/>
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Height" Value="40"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                    </Trigger>
+                    <Trigger Property="IsFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                    </Trigger>
+                </Style.Triggers>
             </Style>
             
             <!-- Label Style -->
@@ -63,7 +130,8 @@
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Margin" Value="0,10,0,5"/>
+                <Setter Property="Margin" Value="0,8,0,4"/>
+                <Setter Property="Padding" Value="0"/>
             </Style>
         </ResourceDictionary>
     </Application.Resources>
