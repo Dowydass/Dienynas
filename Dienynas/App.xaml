@@ -7,8 +7,8 @@
         <!-- Global application styles -->
         <ResourceDictionary>
             <!-- Modern color palette -->
-            <SolidColorBrush x:Key="PrimaryColor" Color="#1976D2"/>
-            <SolidColorBrush x:Key="SecondaryColor" Color="#0D47A1"/>
+            <SolidColorBrush x:Key="PrimaryColor" Color="#FF000000"/>
+            <SolidColorBrush x:Key="SecondaryColor" Color="#FF222222"/>
             <SolidColorBrush x:Key="AccentColor" Color="#43A047"/>
             <SolidColorBrush x:Key="BackgroundColor" Color="#FAFBFC"/>
             <SolidColorBrush x:Key="TextColor" Color="#212121"/>

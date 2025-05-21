@@ -169,7 +169,6 @@ namespace Dienynas
                 }
 
                 // Select the first item by default if not already selected
-                // 
                 if (QuickSortComboBox.SelectedIndex < 0 && QuickSortComboBox.Items.Count > 0)
                 {
                     QuickSortComboBox.SelectedIndex = 0;
@@ -887,7 +886,6 @@ namespace Dienynas
         
         /// <summary>
         /// Handles the toggle button click for showing/hiding the search and sort panel
-        
         /// </summary>
         private void ToggleSearchSortPanel_Click(object sender, RoutedEventArgs e)
         {
